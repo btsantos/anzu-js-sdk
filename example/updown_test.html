@@ -1,0 +1,84 @@
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title>updown test</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>updown test</h1>
+      <button id="start" type="button">start video</button>
+      <h2>up</h2>
+      <video id="local-video" autoplay="" style="width: 400px; height: 275px; border: 1px solid black;"></video>
+      <h2>down</h2>
+      <video id="remote-video" autoplay="" style="width: 400px; height: 275px; border: 1px solid black;"></video>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="./anzu.js"></script>
+    <script type="text/javascript">
+var anzu = new Anzu();
+var channelId = "BAP7cbuKk";
+var apiKey = "30f9fc6c-a823-47d7-98b5-1a881400c2db";
+var upstreamToken = "94tYjkClLliCBQ7s1";
+
+
+$("#start").on("click", function() {
+  upstream();
+  setTimeout(function() {
+    anzu.getDownstreamToken(
+      channelId,
+      apiKey,
+      "2015-11-24T17:09:26.830764",
+      "c7352a6067615700f647a7ab486d85a9eb59c1a08ae3e840b09a4b101d4000a3",
+      function(error, response) {
+        if (error !== null) {
+          console.error(error);
+        }
+        else {
+          var downstreamToken = JSON.parse(response.text).downstreamToken;
+          downstream(downstreamToken);
+        }
+      }
+    );
+  }, 2000)
+});
+
+function upstream() {
+  console.log("= upstream =");
+  anzu.startUpstream(
+    channelId,
+    upstreamToken,
+    document.getElementById("local-video"),
+    function() {
+      console.log("- success -");
+    },
+    function(e) {
+      console.log(e);
+      console.log("- error -");
+    },
+    function(e) {
+      console.log("- close -");
+    }
+  );
+}
+
+function downstream(downstreamToken) {
+  console.log("= downstream =");
+  anzu.startDownstream(
+    channelId,
+    downstreamToken,
+    document.getElementById("remote-video"),
+    function() {
+      console.log("- success -");
+    },
+    function(e) {
+      console.log("- error -");
+    },
+    function(e) {
+      console.log("- close -");
+    }
+  );
+}
+    </script>
+  </body>
+</html>
