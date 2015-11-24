@@ -2,7 +2,7 @@
   "name": "anzu.js",
   "version": "0.0.0",
   "description": "anzu.js",
-  "main": "anzu.js",
+  "main": "dist/anzu.js",
   "scripts": {
     "lint": "gulp eslint",
     "dist": "gulp dist"
