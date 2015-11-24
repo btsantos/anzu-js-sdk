@@ -1,0 +1,19 @@
+{
+  "name": "anzu.js",
+  "version": "0.0.0",
+  "description": "anzu.js",
+  "main": "anzu.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shiguredo/anzu.js.git"
+  },
+  "author": "Shiguredo Inc.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/shiguredo/anzu.js/issues"
+  },
+  "homepage": "https://github.com/shiguredo/anzu.js#readme"
+}
