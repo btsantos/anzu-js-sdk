@@ -14,8 +14,8 @@ import pkg from "./package.json";
 gulp.task("dist", callback => {
   return runSequence.use(gulp)(
       "compile",
-      "header",
       "uglify",
+      "header",
       callback
       );
 });
@@ -35,14 +35,13 @@ gulp.task("compile", () => {
 
 gulp.task("uglify", () => {
   return gulp.src(["dist/anzu.js"])
-    .pipe(uglify({preserveComments: "some"}))
+    .pipe(uglify())
     .pipe(rename({extname: ".min.js"}))
     .pipe(gulp.dest("dist"));
 });
 
 gulp.task("header", () => {
-  let banner = `
-/*!
+  let banner = `/**
  * <%= pkg.name %>
  * <%= pkg.description %>
  * @version <%= pkg.version %>
@@ -50,7 +49,7 @@ gulp.task("header", () => {
  * @license <%= pkg.license %>
  */
 `;
-  return gulp.src(["dist/anzu.js"])
+  return gulp.src(["dist/anzu.js", "dist/anzu.min.js"])
     .pipe(header(banner, {pkg: pkg}))
     .pipe(gulp.dest("dist"));
 });
