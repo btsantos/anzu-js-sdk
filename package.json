@@ -4,7 +4,8 @@
   "description": "anzu.js",
   "main": "anzu.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "gulp eslint",
+    "dist": "gulp dist"
   },
   "repository": {
     "type": "git",
