@@ -10,9 +10,9 @@
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _sora = require("sora.js");
+var _soraJsSdk = require("sora-js-sdk");
 
-var _sora2 = _interopRequireDefault(_sora);
+var _soraJsSdk2 = _interopRequireDefault(_soraJsSdk);
 
 var _superagent = require("superagent");
 
@@ -38,7 +38,7 @@ var Anzu = (function () {
 
     // TODO(yuito): url を修正する
     this.url = "http://localhost:8081/";
-    this.sora = new _sora2.default("ws://127.0.0.1:5000/signaling");
+    this.sora = new _soraJsSdk2.default("ws://127.0.0.1:5000/signaling");
   }
   /**
    * アップストリームを開始する
@@ -269,7 +269,7 @@ module.exports = Anzu;
  * @param {object} Error
  */
 
-},{"sora.js":2,"superagent":3}],2:[function(require,module,exports){
+},{"sora-js-sdk":2,"superagent":3}],2:[function(require,module,exports){
 (function (global){
 
 /*!

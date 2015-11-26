@@ -1,4 +1,4 @@
-import Sora from "sora.js";
+import Sora from "sora-js-sdk";
 import request from "superagent";
 
 
