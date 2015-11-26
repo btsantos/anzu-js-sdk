@@ -90,6 +90,7 @@ function upstream() {
   anzu.startUpstream(
     channelId,
     upstreamToken,
+    {video: true},
     document.getElementById("local-video"),
     function() {
       console.log("- success -");

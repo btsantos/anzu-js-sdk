@@ -18,7 +18,7 @@ class Anzu {
   startUpstream(channelId, upstreamToken, videoElement, onSuccess, onError, onClose) {
     let connection = this.sora.connection(
       () => {
-        navigator.getUserMedia({video: true}, function(stream) {
+        navigator.getUserMedia(constraints, function(stream) {
           videoElement.src = window.URL.createObjectURL(stream);
           videoElement.play();
           connection.connect({role: "upstream", channelId: channelId, accessToken: upstreamToken}, (message) => {
