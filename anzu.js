@@ -11,7 +11,8 @@ navigator.getUserMedia = navigator.getUserMedia ||
 
 class Anzu {
   constructor() {
-    // TODO(yuito): host を修正する
+    // TODO(yuito): url を修正する
+    this.url = "http://localhost:8081/";
     this.sora = new Sora("ws://127.0.0.1:5000/signaling");
   }
   startUpstream(channelId, upstreamToken, videoElement, onSuccess, onError, onClose) {
@@ -87,9 +88,8 @@ class Anzu {
     );
   }
   getDownstreamToken(channelId, apiKey, date, signature, onEnd) {
-    // TODO(yuito): host を修正する
     request
-      .post("http://localhost:8081/")
+      .post(this.url)
       .set("x-anzu-target", "AnzuAPI_20151216.GetDownstreamToken")
       .set("x-anzu-apikey", apiKey)
       .set("x-anzu-date", date)

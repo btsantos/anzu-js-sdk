@@ -30,7 +30,8 @@ var Anzu = (function () {
   function Anzu() {
     _classCallCheck(this, Anzu);
 
-    // TODO(yuito): host を修正する
+    // TODO(yuito): url を修正する
+    this.url = "http://localhost:8081/";
     this.sora = new _sora2.default("ws://127.0.0.1:5000/signaling");
   }
 
@@ -105,8 +106,7 @@ var Anzu = (function () {
   }, {
     key: "getDownstreamToken",
     value: function getDownstreamToken(channelId, apiKey, date, signature, onEnd) {
-      // TODO(yuito): host を修正する
-      _superagent2.default.post("http://localhost:8081/").set("x-anzu-target", "AnzuAPI_20151216.GetDownstreamToken").set("x-anzu-apikey", apiKey).set("x-anzu-date", date).set("x-anzu-signature", signature).send({ channelId: channelId }).end(function (e, res) {
+      _superagent2.default.post(this.url).set("x-anzu-target", "AnzuAPI_20151216.GetDownstreamToken").set("x-anzu-apikey", apiKey).set("x-anzu-date", date).set("x-anzu-signature", signature).send({ channelId: channelId }).end(function (e, res) {
         onEnd(e, res);
       });
     }
