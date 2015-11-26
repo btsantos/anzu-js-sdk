@@ -1,5 +1,7 @@
+import fs from "fs";
 import browserify from "browserify";
 import gulp from "gulp";
+import jsdoc2md from "gulp-jsdoc-to-markdown";
 import eslint from "gulp-eslint";
 import uglify from "gulp-uglify";
 import rename from "gulp-rename";
@@ -7,6 +9,7 @@ import header from "gulp-header";
 import runSequence from "run-sequence";
 import buffer from "vinyl-buffer";
 import source from "vinyl-source-stream";
+
 
 import pkg from "./package.json";
 
@@ -59,4 +62,14 @@ gulp.task("eslint", () => {
   .pipe(eslint())
   .pipe(eslint.format())
   .pipe(eslint.failAfterError());
+});
+
+gulp.task("jsdoc", () => {
+  return gulp.src(["anzu.js"])
+  .pipe(jsdoc2md({  }))
+  .pipe(rename(function(path){
+    path.extname = ".md";
+    path.basename = "api";
+  }))
+  .pipe(gulp.dest("."));
 });

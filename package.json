@@ -5,7 +5,8 @@
   "main": "dist/anzu.js",
   "scripts": {
     "lint": "gulp eslint",
-    "dist": "gulp dist"
+    "dist": "gulp dist",
+    "doc": "gulp jsdoc"
   },
   "repository": {
     "type": "git",
@@ -25,8 +26,10 @@
     "gulp": "^3.9.0",
     "gulp-eslint": "^1.1.0",
     "gulp-header": "^1.7.1",
+    "gulp-jsdoc-to-markdown": "^1.1.1",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^1.5.1",
+    "jsdoc": "^3.4.0",
     "run-sequence": "^1.1.5",
     "sora.js": "shiguredo/sora.js#develop",
     "superagent": "^1.4.0",
