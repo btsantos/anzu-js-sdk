@@ -15,7 +15,7 @@ class Anzu {
     this.url = "http://localhost:8081/";
     this.sora = new Sora("ws://127.0.0.1:5000/signaling");
   }
-  startUpstream(channelId, upstreamToken, videoElement, onSuccess, onError, onClose) {
+  startUpstream(channelId, upstreamToken, constraints, videoElement, onSuccess, onError, onClose) {
     let connection = this.sora.connection(
       () => {
         navigator.getUserMedia(constraints, function(stream) {
