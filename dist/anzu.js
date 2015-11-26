@@ -26,7 +26,13 @@ var RTCPeerConnection = window.mozRTCPeerConnection || window.webkitRTCPeerConne
 var RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription;
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
+/** Class anzu-js-sdk */
+
 var Anzu = (function () {
+  /**
+   * @constructor
+   */
+
   function Anzu() {
     _classCallCheck(this, Anzu);
 
@@ -34,12 +40,39 @@ var Anzu = (function () {
     this.url = "http://localhost:8081/";
     this.sora = new _sora2.default("ws://127.0.0.1:5000/signaling");
   }
+  /**
+   * アップストリームを開始する
+   * @param {string} channelId - チャンネルID
+   * @param {string} upstreamToken - アップストリームトークン
+   * @param {object} constraints - LocalMediaStream オブジェクトがサポートするメディアタイプ
+   * @param {object} videoElement - ストリームをプレイするビデオエレメント
+   * @param {onSuccessCallback} onSuccess - 接続成功時のコールバック
+   * @param {onErrorCallback} onError - エラー時のコールバック
+   * @param {onCloseCallback} onClose - 接続切断時のコールバック
+   * @example
+   * var anzu = new Anzu();
+   * anzu.startUpstream(
+   *   "channelId",
+   *   "token",
+   *   {video: true},
+   *   document.getElementById("local-video"),
+   *   function() {
+   *     // success
+   *   },
+   *   function(error) {
+   *     // error
+   *   },
+   *   function(error) {
+   *     // close
+   *   }
+   * )
+   */
 
   _createClass(Anzu, [{
     key: "startUpstream",
-    value: function startUpstream(channelId, upstreamToken, videoElement, onSuccess, onError, onClose) {
+    value: function startUpstream(channelId, upstreamToken, constraints, videoElement, onSuccess, onError, onClose) {
       var connection = this.sora.connection(function () {
-        navigator.getUserMedia({ video: true }, function (stream) {
+        navigator.getUserMedia(constraints, function (stream) {
           videoElement.src = window.URL.createObjectURL(stream);
           videoElement.play();
           connection.connect({ role: "upstream", channelId: channelId, accessToken: upstreamToken }, function (message) {
@@ -70,6 +103,32 @@ var Anzu = (function () {
         onClose(e);
       });
     }
+    /**
+     * ダウンストリームを開始する
+     * @param {string} channelId - チャンネルID
+     * @param {string} downstreamToken - ダウンストリームトークン
+     * @param {object} videoElement - ストリームをプレイするビデオエレメント
+     * @param {onSuccessCallback} onSuccess - 接続成功時のコールバック
+     * @param {onErrorCallback} onError - エラー時のコールバック
+     * @param {onCloseCallback} onClose - 接続切断時のコールバック
+     * @example
+     * var anzu = new Anzu();
+     * anzu.startDownstream(
+     *   "channelId",
+     *   "token",
+     *   document.getElementById("remote-video"),
+     *   function() {
+     *     // success
+     *   },
+     *   function(error) {
+     *     // error
+     *   },
+     *   function(error) {
+     *     // close
+     *   }
+     * )
+     */
+
   }, {
     key: "startDownstream",
     value: function startDownstream(channelId, downstreamToken, videoElement, onSuccess, onError, onClose) {
@@ -103,6 +162,26 @@ var Anzu = (function () {
         onClose(e);
       });
     }
+    /**
+     * ダウンストリームトークンを取得する
+     * @param {string} channelId - チャンネルID
+     * @param {string} apiKey - APIキー
+     * @param {string} date - 日時
+     * @param {string} signature - シグネチャー
+     * @param {onEndCallback} onEnd - レスポンスハンドラーコールバック
+     * @example
+     * var anzu = new Anzu();
+     * anzu.getDownstreamToken(
+     *   "channelId",
+     *   "apiKey",
+     *   "2015-01-01T00:00:00.000000"
+     *   "signature"
+     *   function(error, response) {
+     *     // response handler
+     *   },
+     * )
+     */
+
   }, {
     key: "getDownstreamToken",
     value: function getDownstreamToken(channelId, apiKey, date, signature, onEnd) {
@@ -110,6 +189,28 @@ var Anzu = (function () {
         onEnd(e, res);
       });
     }
+    /**
+     * 特定の接続を切断する
+     * @param {string} channelId - チャンネルID
+     * @param {string} clientId - クライアントID
+     * @param {string} apiKey - APIキー
+     * @param {string} date - 日時
+     * @param {string} signature - シグネチャー
+     * @param {onEndCallback} onEnd - レスポンスハンドラーコールバック
+     * @example
+     * var anzu = new Anzu();
+     * anzu.removeConnection(
+     *   "channelId",
+     *   "clientId",
+     *   "apiKey",
+     *   "2015-01-01T00:00:00.000000"
+     *   "signature"
+     *   function(error, response) {
+     *     // response handler
+     *   },
+     * )
+     */
+
   }, {
     key: "removeConnection",
     value: function removeConnection(channelId, clientId, apiKey, date, signature, onEnd) {
@@ -117,6 +218,26 @@ var Anzu = (function () {
         onEnd(e, res);
       });
     }
+    /**
+     * 接続の一覧を取得する
+     * @param {string} channelId - チャンネルID
+     * @param {string} apiKey - APIキー
+     * @param {string} date - 日時
+     * @param {string} signature - シグネチャー
+     * @param {onEndCallback} onEnd - レスポンスハンドラーコールバック
+     * @example
+     * var anzu = new Anzu();
+     * anzu.listConnection(
+     *   "channelId",
+     *   "apiKey",
+     *   "2015-01-01T00:00:00.000000"
+     *   "signature"
+     *   function(error, response) {
+     *     // response handler
+     *   },
+     * )
+     */
+
   }, {
     key: "listConnection",
     value: function listConnection(channelId, apiKey, date, signature, onEnd) {
@@ -130,6 +251,23 @@ var Anzu = (function () {
 })();
 
 module.exports = Anzu;
+
+/**
+ * @callback onEndCallback
+ * @param {object} error
+ * @param {object} response
+ */
+/**
+ * @callback onSuccessCallback
+ */
+/**
+ * @callback onErrorCallback
+ * @param {object} error
+ */
+/**
+ * @callback onCloseCallback
+ * @param {object} Error
+ */
 
 },{"sora.js":2,"superagent":3}],2:[function(require,module,exports){
 (function (global){
