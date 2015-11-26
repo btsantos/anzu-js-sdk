@@ -9,12 +9,43 @@ navigator.getUserMedia = navigator.getUserMedia ||
                          navigator.mozGetUserMedia ||
                          navigator.msGetUserMedia;
 
+/** Class anzu-js-sdk */
 class Anzu {
+  /**
+   * @constructor
+   */
   constructor() {
     // TODO(yuito): url を修正する
     this.url = "http://localhost:8081/";
     this.sora = new Sora("ws://127.0.0.1:5000/signaling");
   }
+  /**
+   * アップストリームを開始する
+   * @param {string} channelId - チャンネルID
+   * @param {string} upstreamToken - アップストリームトークン
+   * @param {object} constraints - LocalMediaStream オブジェクトがサポートするメディアタイプ
+   * @param {object} videoElement - ストリームをプレイするビデオエレメント
+   * @param {onSuccessCallback} onSuccess - 接続成功時のコールバック
+   * @param {onErrorCallback} onError - エラー時のコールバック
+   * @param {onCloseCallback} onClose - 接続切断時のコールバック
+   * @example
+   * var anzu = new Anzu();
+   * anzu.startUpstream(
+   *   "channelId",
+   *   "token",
+   *   {video: true},
+   *   document.getElementById("local-video"),
+   *   function() {
+   *     // success
+   *   },
+   *   function(error) {
+   *     // error
+   *   },
+   *   function(error) {
+   *     // close
+   *   }
+   * )
+   */
   startUpstream(channelId, upstreamToken, constraints, videoElement, onSuccess, onError, onClose) {
     let connection = this.sora.connection(
       () => {
@@ -52,6 +83,31 @@ class Anzu {
       }
     );
   }
+  /**
+   * ダウンストリームを開始する
+   * @param {string} channelId - チャンネルID
+   * @param {string} downstreamToken - ダウンストリームトークン
+   * @param {object} videoElement - ストリームをプレイするビデオエレメント
+   * @param {onSuccessCallback} onSuccess - 接続成功時のコールバック
+   * @param {onErrorCallback} onError - エラー時のコールバック
+   * @param {onCloseCallback} onClose - 接続切断時のコールバック
+   * @example
+   * var anzu = new Anzu();
+   * anzu.startDownstream(
+   *   "channelId",
+   *   "token",
+   *   document.getElementById("remote-video"),
+   *   function() {
+   *     // success
+   *   },
+   *   function(error) {
+   *     // error
+   *   },
+   *   function(error) {
+   *     // close
+   *   }
+   * )
+   */
   startDownstream(channelId, downstreamToken, videoElement, onSuccess, onError, onClose) {
     let connection = this.sora.connection(
       () => {
@@ -87,6 +143,25 @@ class Anzu {
       }
     );
   }
+  /**
+   * ダウンストリームトークンを取得する
+   * @param {string} channelId - チャンネルID
+   * @param {string} apiKey - APIキー
+   * @param {string} date - 日時
+   * @param {string} signature - シグネチャー
+   * @param {onEndCallback} onEnd - レスポンスハンドラーコールバック
+   * @example
+   * var anzu = new Anzu();
+   * anzu.getDownstreamToken(
+   *   "channelId",
+   *   "apiKey",
+   *   "2015-01-01T00:00:00.000000"
+   *   "signature"
+   *   function(error, response) {
+   *     // response handler
+   *   },
+   * )
+   */
   getDownstreamToken(channelId, apiKey, date, signature, onEnd) {
     request
       .post(this.url)
@@ -99,6 +174,27 @@ class Anzu {
         onEnd(e, res);
       });
   }
+  /**
+   * 特定の接続を切断する
+   * @param {string} channelId - チャンネルID
+   * @param {string} clientId - クライアントID
+   * @param {string} apiKey - APIキー
+   * @param {string} date - 日時
+   * @param {string} signature - シグネチャー
+   * @param {onEndCallback} onEnd - レスポンスハンドラーコールバック
+   * @example
+   * var anzu = new Anzu();
+   * anzu.removeConnection(
+   *   "channelId",
+   *   "clientId",
+   *   "apiKey",
+   *   "2015-01-01T00:00:00.000000"
+   *   "signature"
+   *   function(error, response) {
+   *     // response handler
+   *   },
+   * )
+   */
   removeConnection(channelId, clientId, apiKey, date, signature, onEnd) {
     request
       .post(this.url)
@@ -111,6 +207,25 @@ class Anzu {
         onEnd(e, res);
       });
   }
+  /**
+   * 接続の一覧を取得する
+   * @param {string} channelId - チャンネルID
+   * @param {string} apiKey - APIキー
+   * @param {string} date - 日時
+   * @param {string} signature - シグネチャー
+   * @param {onEndCallback} onEnd - レスポンスハンドラーコールバック
+   * @example
+   * var anzu = new Anzu();
+   * anzu.listConnection(
+   *   "channelId",
+   *   "apiKey",
+   *   "2015-01-01T00:00:00.000000"
+   *   "signature"
+   *   function(error, response) {
+   *     // response handler
+   *   },
+   * )
+   */
   listConnection(channelId, apiKey, date, signature, onEnd) {
     request
       .post(this.url)
@@ -126,3 +241,20 @@ class Anzu {
 }
 
 module.exports = Anzu;
+
+/**
+ * @callback onEndCallback
+ * @param {object} error
+ * @param {object} response
+ */
+/**
+ * @callback onSuccessCallback
+ */
+/**
+ * @callback onErrorCallback
+ * @param {object} error
+ */
+/**
+ * @callback onCloseCallback
+ * @param {object} Error
+ */
