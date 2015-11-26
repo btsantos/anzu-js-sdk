@@ -99,6 +99,30 @@ class Anzu {
         onEnd(e, res);
       });
   }
+  removeConnection(channelId, clientId, apiKey, date, signature, onEnd) {
+    request
+      .post(this.url)
+      .set("x-anzu-target", "AnzuAPI_20151216.RemoveConnection")
+      .set("x-anzu-apikey", apiKey)
+      .set("x-anzu-date", date)
+      .set("x-anzu-signature", signature)
+      .send({channelId: channelId, clientId: clientId})
+      .end((e, res) => {
+        onEnd(e, res);
+      });
+  }
+  listConnection(channelId, apiKey, date, signature, onEnd) {
+    request
+      .post(this.url)
+      .set("x-anzu-target", "AnzuAPI_20151216.ListConnections")
+      .set("x-anzu-apikey", apiKey)
+      .set("x-anzu-date", date)
+      .set("x-anzu-signature", signature)
+      .send({channelId: channelId})
+      .end((e, res) => {
+        onEnd(e, res);
+      });
+  }
 }
 
 module.exports = Anzu;

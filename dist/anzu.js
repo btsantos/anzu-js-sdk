@@ -110,6 +110,20 @@ var Anzu = (function () {
         onEnd(e, res);
       });
     }
+  }, {
+    key: "removeConnection",
+    value: function removeConnection(channelId, clientId, apiKey, date, signature, onEnd) {
+      _superagent2.default.post(this.url).set("x-anzu-target", "AnzuAPI_20151216.RemoveConnection").set("x-anzu-apikey", apiKey).set("x-anzu-date", date).set("x-anzu-signature", signature).send({ channelId: channelId, clientId: clientId }).end(function (e, res) {
+        onEnd(e, res);
+      });
+    }
+  }, {
+    key: "listConnection",
+    value: function listConnection(channelId, apiKey, date, signature, onEnd) {
+      _superagent2.default.post(this.url).set("x-anzu-target", "AnzuAPI_20151216.ListConnections").set("x-anzu-apikey", apiKey).set("x-anzu-date", date).set("x-anzu-signature", signature).send({ channelId: channelId }).end(function (e, res) {
+        onEnd(e, res);
+      });
+    }
   }]);
 
   return Anzu;
