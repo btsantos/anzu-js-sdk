@@ -1,12 +1,14 @@
 module.exports = function(config) {
   config.set({
     basePath: "",
-    frameworks: ["mocha", "browserify"],
+    frameworks: ["mocha", "browserify", "fixture"],
     files: [
-      "test/**/*.spec.js"
+      "test/**/*.spec.js",
+      "test/fixtures/**/*.html"
     ],
     exclude: [],
     preprocessors: {
+      "test/**/*.html": "html2js",
       "test/**/*.spec.js": "browserify"
     },
     browserify: {
