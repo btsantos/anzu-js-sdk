@@ -20,14 +20,9 @@
           <video id="remote-video1" autoplay="" style="width: 400px; height: 275px; border: 1px solid black;"></video>
           <video id="remote-video2" autoplay="" style="width: 400px; height: 275px; border: 1px solid black;"></video>
         </div>
-        <div class="col-xs-6">
-          <h2>upstream connections</h2>
-          <ul id="upstreams">
-          </ul>
-        </div>
-        <div class="col-xs-6">
-          <h2>downstream connections</h2>
-          <ul id="downstreams">
+        <div class="col-xs-12">
+          <h2>connections</h2>
+          <ul id="connections">
           </ul>
         </div>
       </div>
@@ -126,29 +121,21 @@ function downstream(downstreamToken, element) {
 function listConnection() {
   anzu.listConnection(channelId, apiKey, datetime, signature, function(error, response) {
     var data = JSON.parse(response.text);
-    $("#upstreams").html("");
-    $("#downstreams").html("");
-    $.each(data.upstreams, function(_, upstream) {
+    $("#connections").html("");
+    $.each(data, function(_, connection) {
       var li = $("<li>");
-      $.each(upstream, function(key, value) {
-        li.append("<p>" + key + ": " + value + "</p>");
-      })
-      $("#upstreams").append(li);
-    });
-    $.each(data.downstreams, function(_, downstream) {
-      var li = $("<li>");
-      $.each(downstream, function(key, value) {
+      $.each(connection, function(key, value) {
         li.append("<p>" + key + ": " + value + "</p>");
       })
       var button = $("<button>切断</button>");
       button.on("click", function() {
-        anzu.removeConnection(downstream.channelId, downstream.clientId, apiKey, datetime, signature, function(error, response) {
-          console.log("- remove connection -");
+        anzu.disconnect(connection.channelId, connection.clientId, apiKey, datetime, signature, function(error, response) {
+          console.log("- disconnect -");
           console.log(response);
         })
       });
       li.append(button);
-      $("#downstreams").append(li);
+      $("#connections").append(li);
     });
   });
 }
