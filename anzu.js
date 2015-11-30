@@ -16,7 +16,7 @@ class Anzu {
    */
   constructor() {
     // TODO(yuito): url を修正する
-    this.url = "http://localhost:8081/";
+    this.url = "http://localhost:8000/";
     this.sora = new Sora("ws://127.0.0.1:5000/signaling");
   }
   /**
