@@ -37,7 +37,7 @@ var Anzu = (function () {
     _classCallCheck(this, Anzu);
 
     // TODO(yuito): url を修正する
-    this.url = "http://localhost:8081/";
+    this.url = "http://localhost:8000/";
     this.sora = new _soraJsSdk2.default("ws://127.0.0.1:5000/signaling");
   }
   /**
@@ -212,9 +212,9 @@ var Anzu = (function () {
      */
 
   }, {
-    key: "removeConnection",
-    value: function removeConnection(channelId, clientId, apiKey, date, signature, onEnd) {
-      _superagent2.default.post(this.url).set("x-anzu-target", "AnzuAPI_20151216.RemoveConnection").set("x-anzu-apikey", apiKey).set("x-anzu-date", date).set("x-anzu-signature", signature).send({ channelId: channelId, clientId: clientId }).end(function (e, res) {
+    key: "disconnect",
+    value: function disconnect(channelId, clientId, apiKey, date, signature, onEnd) {
+      _superagent2.default.post(this.url).set("x-anzu-target", "AnzuAPI_20151216.Disconnect").set("x-anzu-apikey", apiKey).set("x-anzu-date", date).set("x-anzu-signature", signature).send({ channelId: channelId, clientId: clientId }).end(function (e, res) {
         onEnd(e, res);
       });
     }
