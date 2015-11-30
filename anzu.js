@@ -195,10 +195,10 @@ class Anzu {
    *   },
    * )
    */
-  removeConnection(channelId, clientId, apiKey, date, signature, onEnd) {
+  disconnect(channelId, clientId, apiKey, date, signature, onEnd) {
     request
       .post(this.url)
-      .set("x-anzu-target", "AnzuAPI_20151216.RemoveConnection")
+      .set("x-anzu-target", "AnzuAPI_20151216.Disconnect")
       .set("x-anzu-apikey", apiKey)
       .set("x-anzu-date", date)
       .set("x-anzu-signature", signature)
