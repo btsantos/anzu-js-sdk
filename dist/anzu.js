@@ -85,6 +85,7 @@ var Anzu = (function () {
               pc.createAnswer(function (answer) {
                 pc.setLocalDescription(answer, function () {
                   connection.answer(answer.sdp);
+                  onSuccess();
                   pc.onicecandidate = function (event) {
                     if (event.candidate !== null) {
                       connection.candidate(event.candidate);
@@ -94,7 +95,6 @@ var Anzu = (function () {
               }, onError);
             }, onError);
           }, onError);
-          onSuccess();
         }, onError);
       }, onError, function (e) {
         videoElement.pause();
@@ -142,6 +142,7 @@ var Anzu = (function () {
             pc.createAnswer(function (answer) {
               pc.setLocalDescription(answer, function () {
                 connection.answer(answer.sdp);
+                onSuccess();
                 pc.onicecandidate = function (event) {
                   if (event.candidate !== null) {
                     connection.candidate(event.candidate);
@@ -155,7 +156,6 @@ var Anzu = (function () {
             videoElement.play();
           };
         }, onError);
-        onSuccess();
       }, onError, function (e) {
         videoElement.pause();
         videoElement.src = "";
