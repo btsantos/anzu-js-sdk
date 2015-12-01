@@ -62,6 +62,7 @@ class Anzu {
               pc.createAnswer(function(answer) {
                 pc.setLocalDescription(answer, function() {
                   connection.answer(answer.sdp);
+                  onSuccess();
                   pc.onicecandidate = function(event) {
                     if (event.candidate !== null) {
                       connection.candidate(event.candidate);
@@ -71,7 +72,6 @@ class Anzu {
               }, onError);
             }, onError);
           }, onError);
-          onSuccess();
         }, onError);
       },
       onError,
@@ -120,6 +120,7 @@ class Anzu {
             pc.createAnswer((answer) => {
               pc.setLocalDescription(answer, () => {
                 connection.answer(answer.sdp);
+                onSuccess();
                 pc.onicecandidate = (event) => {
                   if (event.candidate !== null) {
                     connection.candidate(event.candidate);
@@ -133,7 +134,6 @@ class Anzu {
             videoElement.play();
           };
         }, onError);
-        onSuccess();
       },
       onError,
       (e) => {
