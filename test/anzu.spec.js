@@ -2,25 +2,49 @@
 import assert from "power-assert";
 import Anzu from "../anzu";
 
+let channelId = "7N3fsMHob";
+let upstreamToken = "PG9A6RXgYqiqWKOVO";
+
+
+// Karma が起動する Chrome でカメラアクセスを許可しないとテストは成功しない
 describe("Anzu", () => {
   describe("startUpstream", () => {
     before(() => {
       document.body.innerHTML = window.__html__["test/fixtures/localvideo.html"];
     });
-    it("startUpstream", (done) => {
+    it("Success startUpstream", (done) => {
       let anzu = new Anzu();
       anzu.startUpstream(
-        "sora",
+        channelId,
+        upstreamToken,
+        {video: true},
+        document.getElementById("local-video"),
+        () => {
+          done();
+        },
+        (e) => {
+          assert(false, e);
+        },
+        (e) => {
+          assert(false, e);
+        }
+      );
+    });
+    it("Failed startUpstream", (done) => {
+      let anzu = new Anzu();
+      anzu.startUpstream(
+        channelId,
         "",
         {video: true},
         document.getElementById("local-video"),
-        function() {
-          done();
+        () => {
+          assert(false, "Success start upstream");
         },
-        function(_e) {
-          done();
+        (e) => {
+          assert(true, e);
         },
-        function(_e) {
+        (e) => {
+          assert(true, e);
           done();
         }
       );
