@@ -25,7 +25,7 @@ Class anzu-js-sdk
   * [.startUpstream(channelId, upstreamToken, constraints, videoElement, onSuccess, onError, onClose)](#Anzu+startUpstream)
   * [.startDownstream(channelId, downstreamToken, videoElement, onSuccess, onError, onClose)](#Anzu+startDownstream)
   * [.getDownstreamToken(channelId, apiKey, date, signature, onEnd)](#Anzu+getDownstreamToken)
-  * [.removeConnection(channelId, clientId, apiKey, date, signature, onEnd)](#Anzu+removeConnection)
+  * [.disconnect(channelId, clientId, apiKey, date, signature, onEnd)](#Anzu+disconnect)
   * [.listConnection(channelId, apiKey, date, signature, onEnd)](#Anzu+listConnection)
 
 <a name="Anzu+startUpstream"></a>
@@ -123,8 +123,8 @@ anzu.getDownstreamToken(
   },
 )
 ```
-<a name="Anzu+removeConnection"></a>
-### anzu.removeConnection(channelId, clientId, apiKey, date, signature, onEnd)
+<a name="Anzu+disconnect"></a>
+### anzu.disconnect(channelId, clientId, apiKey, date, signature, onEnd)
 特定の接続を切断する
 
 **Kind**: instance method of <code>[Anzu](#Anzu)</code>  
