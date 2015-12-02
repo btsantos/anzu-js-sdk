@@ -69,7 +69,7 @@ gulp.task("jsdoc", () => {
   .pipe(jsdoc2md({  }))
   .pipe(rename(function(path){
     path.extname = ".md";
-    path.basename = "api";
+    path.basename = "API";
   }))
   .pipe(gulp.dest("."));
 });
