@@ -9,7 +9,9 @@ navigator.getUserMedia = navigator.getUserMedia ||
                          navigator.mozGetUserMedia ||
                          navigator.msGetUserMedia;
 
-/** Class anzu-js-sdk */
+/**
+@class Anzu
+*/
 class Anzu {
   /**
    * @constructor
@@ -241,20 +243,3 @@ class Anzu {
 }
 
 module.exports = Anzu;
-
-/**
- * @callback onEndCallback
- * @param {object} error
- * @param {object} response
- */
-/**
- * @callback onSuccessCallback
- */
-/**
- * @callback onErrorCallback
- * @param {object} error
- */
-/**
- * @callback onCloseCallback
- * @param {object} Error
- */
