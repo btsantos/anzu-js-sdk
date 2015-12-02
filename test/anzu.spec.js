@@ -30,24 +30,5 @@ describe("Anzu", () => {
         }
       );
     });
-    it("Failed startUpstream", (done) => {
-      let anzu = new Anzu();
-      anzu.startUpstream(
-        channelId,
-        "",
-        {video: true},
-        document.getElementById("local-video"),
-        () => {
-          assert(false, "Success start upstream");
-        },
-        (e) => {
-          assert(true, e);
-        },
-        (e) => {
-          assert(true, e);
-          done();
-        }
-      );
-    });
   });
 });
