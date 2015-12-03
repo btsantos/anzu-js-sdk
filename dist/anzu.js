@@ -26,7 +26,9 @@ var RTCPeerConnection = window.mozRTCPeerConnection || window.webkitRTCPeerConne
 var RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription;
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
-/** Class anzu-js-sdk */
+/**
+@class Anzu
+*/
 
 var Anzu = (function () {
   /**
@@ -34,11 +36,13 @@ var Anzu = (function () {
    */
 
   function Anzu() {
+    var params = arguments.length <= 0 || arguments[0] === undefined ? { anzuUrl: null, soraUrl: null } : arguments[0];
+
     _classCallCheck(this, Anzu);
 
     // TODO(yuito): url を修正する
-    this.url = "http://localhost:8000/";
-    this.sora = new _soraJsSdk2.default("ws://127.0.0.1:5000/signaling");
+    this.url = params.anzuUrl === null ? "http://localhost:8000/" : params.anzuUrl;
+    this.sora = new _soraJsSdk2.default(params.soraUrl === null ? "ws://127.0.0.1:5000/signaling" : params.soraUrl);
   }
   /**
    * アップストリームを開始する
@@ -252,28 +256,202 @@ var Anzu = (function () {
 
 module.exports = Anzu;
 
+},{"sora-js-sdk":4,"superagent":5}],2:[function(require,module,exports){
+
 /**
- * @callback onEndCallback
- * @param {object} error
- * @param {object} response
- */
-/**
- * @callback onSuccessCallback
- */
-/**
- * @callback onErrorCallback
- * @param {object} error
- */
-/**
- * @callback onCloseCallback
- * @param {object} Error
+ * Expose `Emitter`.
  */
 
-},{"sora-js-sdk":2,"superagent":3}],2:[function(require,module,exports){
+module.exports = Emitter;
+
+/**
+ * Initialize a new `Emitter`.
+ *
+ * @api public
+ */
+
+function Emitter(obj) {
+  if (obj) return mixin(obj);
+};
+
+/**
+ * Mixin the emitter properties.
+ *
+ * @param {Object} obj
+ * @return {Object}
+ * @api private
+ */
+
+function mixin(obj) {
+  for (var key in Emitter.prototype) {
+    obj[key] = Emitter.prototype[key];
+  }
+  return obj;
+}
+
+/**
+ * Listen on the given `event` with `fn`.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.on =
+Emitter.prototype.addEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+  (this._callbacks[event] = this._callbacks[event] || [])
+    .push(fn);
+  return this;
+};
+
+/**
+ * Adds an `event` listener that will be invoked a single
+ * time then automatically removed.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.once = function(event, fn){
+  var self = this;
+  this._callbacks = this._callbacks || {};
+
+  function on() {
+    self.off(event, on);
+    fn.apply(this, arguments);
+  }
+
+  on.fn = fn;
+  this.on(event, on);
+  return this;
+};
+
+/**
+ * Remove the given callback for `event` or all
+ * registered callbacks.
+ *
+ * @param {String} event
+ * @param {Function} fn
+ * @return {Emitter}
+ * @api public
+ */
+
+Emitter.prototype.off =
+Emitter.prototype.removeListener =
+Emitter.prototype.removeAllListeners =
+Emitter.prototype.removeEventListener = function(event, fn){
+  this._callbacks = this._callbacks || {};
+
+  // all
+  if (0 == arguments.length) {
+    this._callbacks = {};
+    return this;
+  }
+
+  // specific event
+  var callbacks = this._callbacks[event];
+  if (!callbacks) return this;
+
+  // remove all handlers
+  if (1 == arguments.length) {
+    delete this._callbacks[event];
+    return this;
+  }
+
+  // remove specific handler
+  var cb;
+  for (var i = 0; i < callbacks.length; i++) {
+    cb = callbacks[i];
+    if (cb === fn || cb.fn === fn) {
+      callbacks.splice(i, 1);
+      break;
+    }
+  }
+  return this;
+};
+
+/**
+ * Emit `event` with the given args.
+ *
+ * @param {String} event
+ * @param {Mixed} ...
+ * @return {Emitter}
+ */
+
+Emitter.prototype.emit = function(event){
+  this._callbacks = this._callbacks || {};
+  var args = [].slice.call(arguments, 1)
+    , callbacks = this._callbacks[event];
+
+  if (callbacks) {
+    callbacks = callbacks.slice(0);
+    for (var i = 0, len = callbacks.length; i < len; ++i) {
+      callbacks[i].apply(this, args);
+    }
+  }
+
+  return this;
+};
+
+/**
+ * Return array of callbacks for `event`.
+ *
+ * @param {String} event
+ * @return {Array}
+ * @api public
+ */
+
+Emitter.prototype.listeners = function(event){
+  this._callbacks = this._callbacks || {};
+  return this._callbacks[event] || [];
+};
+
+/**
+ * Check if this emitter has `event` handlers.
+ *
+ * @param {String} event
+ * @return {Boolean}
+ * @api public
+ */
+
+Emitter.prototype.hasListeners = function(event){
+  return !! this.listeners(event).length;
+};
+
+},{}],3:[function(require,module,exports){
+
+/**
+ * Reduce `arr` with `fn`.
+ *
+ * @param {Array} arr
+ * @param {Function} fn
+ * @param {Mixed} initial
+ *
+ * TODO: combatible error handling?
+ */
+
+module.exports = function(arr, fn, initial){  
+  var idx = 0;
+  var len = arr.length;
+  var curr = arguments.length == 3
+    ? initial
+    : arr[idx++];
+
+  while (idx < len) {
+    curr = fn.call(null, curr, arr[idx], ++idx, arr);
+  }
+  
+  return curr;
+};
+},{}],4:[function(require,module,exports){
 (function (global){
 
 /*!
- * sora.js
+ * sora-js-sdk
  * WebRTC SFU Sora Signaling Library
  * @version 0.1.0
  * @author Shiguredo Inc.
@@ -331,9 +509,10 @@ var SoraConnection = (function () {
       var self = this;
       this._ws.onclose = function (e) {
         if (e.code === 4401) {
-          onError(e.reason);
+          onError(e);
+        } else {
+          _this._onClose(e);
         }
-        _this._onClose(e);
         self._ws = null;
       };
       this._ws.onmessage = function (event) {
@@ -374,7 +553,7 @@ module.exports = Sora;
 },{}]},{},[1])(1)
 });
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],3:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -1533,196 +1712,5 @@ request.put = function(url, data, fn){
 
 module.exports = request;
 
-},{"emitter":4,"reduce":5}],4:[function(require,module,exports){
-
-/**
- * Expose `Emitter`.
- */
-
-module.exports = Emitter;
-
-/**
- * Initialize a new `Emitter`.
- *
- * @api public
- */
-
-function Emitter(obj) {
-  if (obj) return mixin(obj);
-};
-
-/**
- * Mixin the emitter properties.
- *
- * @param {Object} obj
- * @return {Object}
- * @api private
- */
-
-function mixin(obj) {
-  for (var key in Emitter.prototype) {
-    obj[key] = Emitter.prototype[key];
-  }
-  return obj;
-}
-
-/**
- * Listen on the given `event` with `fn`.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.on =
-Emitter.prototype.addEventListener = function(event, fn){
-  this._callbacks = this._callbacks || {};
-  (this._callbacks[event] = this._callbacks[event] || [])
-    .push(fn);
-  return this;
-};
-
-/**
- * Adds an `event` listener that will be invoked a single
- * time then automatically removed.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.once = function(event, fn){
-  var self = this;
-  this._callbacks = this._callbacks || {};
-
-  function on() {
-    self.off(event, on);
-    fn.apply(this, arguments);
-  }
-
-  on.fn = fn;
-  this.on(event, on);
-  return this;
-};
-
-/**
- * Remove the given callback for `event` or all
- * registered callbacks.
- *
- * @param {String} event
- * @param {Function} fn
- * @return {Emitter}
- * @api public
- */
-
-Emitter.prototype.off =
-Emitter.prototype.removeListener =
-Emitter.prototype.removeAllListeners =
-Emitter.prototype.removeEventListener = function(event, fn){
-  this._callbacks = this._callbacks || {};
-
-  // all
-  if (0 == arguments.length) {
-    this._callbacks = {};
-    return this;
-  }
-
-  // specific event
-  var callbacks = this._callbacks[event];
-  if (!callbacks) return this;
-
-  // remove all handlers
-  if (1 == arguments.length) {
-    delete this._callbacks[event];
-    return this;
-  }
-
-  // remove specific handler
-  var cb;
-  for (var i = 0; i < callbacks.length; i++) {
-    cb = callbacks[i];
-    if (cb === fn || cb.fn === fn) {
-      callbacks.splice(i, 1);
-      break;
-    }
-  }
-  return this;
-};
-
-/**
- * Emit `event` with the given args.
- *
- * @param {String} event
- * @param {Mixed} ...
- * @return {Emitter}
- */
-
-Emitter.prototype.emit = function(event){
-  this._callbacks = this._callbacks || {};
-  var args = [].slice.call(arguments, 1)
-    , callbacks = this._callbacks[event];
-
-  if (callbacks) {
-    callbacks = callbacks.slice(0);
-    for (var i = 0, len = callbacks.length; i < len; ++i) {
-      callbacks[i].apply(this, args);
-    }
-  }
-
-  return this;
-};
-
-/**
- * Return array of callbacks for `event`.
- *
- * @param {String} event
- * @return {Array}
- * @api public
- */
-
-Emitter.prototype.listeners = function(event){
-  this._callbacks = this._callbacks || {};
-  return this._callbacks[event] || [];
-};
-
-/**
- * Check if this emitter has `event` handlers.
- *
- * @param {String} event
- * @return {Boolean}
- * @api public
- */
-
-Emitter.prototype.hasListeners = function(event){
-  return !! this.listeners(event).length;
-};
-
-},{}],5:[function(require,module,exports){
-
-/**
- * Reduce `arr` with `fn`.
- *
- * @param {Array} arr
- * @param {Function} fn
- * @param {Mixed} initial
- *
- * TODO: combatible error handling?
- */
-
-module.exports = function(arr, fn, initial){  
-  var idx = 0;
-  var len = arr.length;
-  var curr = arguments.length == 3
-    ? initial
-    : arr[idx++];
-
-  while (idx < len) {
-    curr = fn.call(null, curr, arr[idx], ++idx, arr);
-  }
-  
-  return curr;
-};
-},{}]},{},[1])(1)
+},{"emitter":2,"reduce":3}]},{},[1])(1)
 });
