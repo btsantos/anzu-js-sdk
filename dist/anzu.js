@@ -42,7 +42,7 @@ var Anzu = (function () {
 
     // TODO(yuito): url を修正する
     this.url = params.anzuUrl === null ? "http://localhost:8000/" : params.anzuUrl;
-    this.sora = new _soraJsSdk2.default(params.soraUrl === null ? "ws://127.0.0.1:5000/signaling" : params.soraUrl);
+    this.sora = new _soraJsSdk2.default(params.soraUrl === null ? "ws://127.0.0.1:8000/signaling" : params.soraUrl);
   }
   /**
    * アップストリームを開始する
