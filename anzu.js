@@ -56,7 +56,7 @@ class Anzu {
           videoElement.play();
           connection.connect({role: "upstream", channelId: channelId, accessToken: upstreamToken}, (message) => {
             let config = {
-              "iceServers": [{"urls": "stun:stun.l.google.com:19302"}]
+              "iceServers": [{"urls": "stun:160.16.224.159:3478"}]
             };
             let pc = new RTCPeerConnection(config);
             pc.addStream(stream);
@@ -115,7 +115,7 @@ class Anzu {
       () => {
         connection.connect({role: "downstream", channelId: channelId, accessToken: downstreamToken}, (message) => {
           let config = {
-            "iceServers": [{"urls": "stun:stun.l.google.com:19302"}]
+            "iceServers": [{"urls": "stun:160.16.224.159:3478"}]
           };
           let pc = new RTCPeerConnection(config);
           pc.setRemoteDescription(new RTCSessionDescription(message), () => {
