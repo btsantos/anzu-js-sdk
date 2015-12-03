@@ -16,10 +16,10 @@ class Anzu {
   /**
    * @constructor
    */
-  constructor() {
+  constructor(params={anzuUrl: null, soraUrl: null}) {
     // TODO(yuito): url を修正する
-    this.url = "http://localhost:8000/";
-    this.sora = new Sora("ws://127.0.0.1:5000/signaling");
+    this.url = params.anzuUrl === null ? "http://localhost:8000/" : params.anzuUrl;
+    this.sora = new Sora(params.soraUrl === null ? "ws://127.0.0.1:5000/signaling" : params.soraUrl);
   }
   /**
    * アップストリームを開始する
