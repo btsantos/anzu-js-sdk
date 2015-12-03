@@ -81,7 +81,7 @@ var Anzu = (function () {
           videoElement.play();
           connection.connect({ role: "upstream", channelId: channelId, accessToken: upstreamToken }, function (message) {
             var config = {
-              "iceServers": [{ "urls": "stun:stun.l.google.com:19302" }]
+              "iceServers": [{ "urls": "stun:160.16.224.159:3478" }]
             };
             var pc = new RTCPeerConnection(config);
             pc.addStream(stream);
@@ -139,7 +139,7 @@ var Anzu = (function () {
       var connection = this.sora.connection(function () {
         connection.connect({ role: "downstream", channelId: channelId, accessToken: downstreamToken }, function (message) {
           var config = {
-            "iceServers": [{ "urls": "stun:stun.l.google.com:19302" }]
+            "iceServers": [{ "urls": "stun:160.16.224.159:3478" }]
           };
           var pc = new RTCPeerConnection(config);
           pc.setRemoteDescription(new RTCSessionDescription(message), function () {
