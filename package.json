@@ -45,11 +45,11 @@
     "power-assert": "^1.2.0",
     "requirejs": "^2.1.22",
     "run-sequence": "^1.1.5",
-    "sora-js-sdk": "shiguredo/sora-js-sdk#develop",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
-    "superagent": "^1.4.0"
+    "superagent": "^1.4.0",
+    "sora-js-sdk": "shiguredo/sora-js-sdk#develop"
   }
 }
