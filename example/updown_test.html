@@ -32,22 +32,22 @@
     <script src="./anzu.js"></script>
     <script type="text/javascript">
 var anzu = new Anzu();
-var channelId = "";
-var apiKey = "";
-var upstreamToken = "";
-var datetime = "";
-var signature = "";
+var channelId = "PbwiQjTfq";
+var apiKey = "23440900-79f6-4964-930f-c96e33a2bce5";
+var upstreamToken = "ONR7EDGRnzydTv8CA";
+var datetime = "2015-12-04T12:18:37.174543";
+var signature = "f0464c6999b63476afb251d9a30555401b42649a5996d9d5a7e3ebbd7119c704";
 
 
 $("#start").on("click", function() {
   upstream();
 
   setTimeout(function() {
-    anzu.getDownstreamToken(channelId, apiKey, datetime, signature)
+    anzu.generateDownstreamToken(channelId, apiKey, datetime, signature)
         .then(function(response) {
           downstream(response.downstreamToken, document.getElementById("remote-video1"));
         });
-    anzu.getDownstreamToken(channelId, apiKey, datetime, signature)
+    anzu.generateDownstreamToken(channelId, apiKey, datetime, signature)
         .then(function(response) {
           downstream(response.downstreamToken, document.getElementById("remote-video2"));
         });
@@ -109,7 +109,7 @@ function listConnection() {
         button.on("click", function() {
           anzu.disconnect(connection.channelId, connection.clientId, apiKey, datetime, signature)
             .then(function(response) {
-              console.log("- coco -");
+              console.log("- disconnect -");
             })
         });
         li.append(button);
