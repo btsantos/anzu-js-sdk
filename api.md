@@ -12,7 +12,7 @@
 * [Anzu](#Anzu)
   * [.startUpstream(channelId, upstreamToken, constraints, videoElement, onSuccess, onError, onClose)](#Anzu+startUpstream)
   * [.startDownstream(channelId, downstreamToken, videoElement, onSuccess, onError, onClose)](#Anzu+startDownstream)
-  * [.getDownstreamToken(channelId, apiKey, date, signature)](#Anzu+getDownstreamToken)
+  * [.generateDownstreamToken(channelId, apiKey, date, signature)](#Anzu+generateDownstreamToken)
   * [.disconnect(channelId, clientId, apiKey, date, signature)](#Anzu+disconnect)
   * [.listConnection(channelId, apiKey, date, signature)](#Anzu+listConnection)
 
@@ -84,8 +84,8 @@ anzu.startDownstream(
   }
 )
 ```
-<a name="Anzu+getDownstreamToken"></a>
-### anzu.getDownstreamToken(channelId, apiKey, date, signature)
+<a name="Anzu+generateDownstreamToken"></a>
+### anzu.generateDownstreamToken(channelId, apiKey, date, signature)
 ダウンストリームトークンを取得する
 
 **Kind**: instance method of <code>[Anzu](#Anzu)</code>  
@@ -100,7 +100,7 @@ anzu.startDownstream(
 **Example**  
 ```js
 var anzu = new Anzu();
-anzu.getDownstreamToken("channelId", "apiKey", "2015-01-01T00:00:00.000000", "signature")
+anzu.generatetDownstreamToken("channelId", "apiKey", "2015-01-01T00:00:00.000000", "signature")
     .then(function(response) {
       console.log(response.downstreamToken);
     });
@@ -151,7 +151,7 @@ anzu.removeConnection("channelId", "apiKey", "2015-01-01T00:00:00.000000" "signa
 * [Anzu](#Anzu)
   * [.startUpstream(channelId, upstreamToken, constraints, videoElement, onSuccess, onError, onClose)](#Anzu+startUpstream)
   * [.startDownstream(channelId, downstreamToken, videoElement, onSuccess, onError, onClose)](#Anzu+startDownstream)
-  * [.getDownstreamToken(channelId, apiKey, date, signature)](#Anzu+getDownstreamToken)
+  * [.generateDownstreamToken(channelId, apiKey, date, signature)](#Anzu+generateDownstreamToken)
   * [.disconnect(channelId, clientId, apiKey, date, signature)](#Anzu+disconnect)
   * [.listConnection(channelId, apiKey, date, signature)](#Anzu+listConnection)
 
@@ -223,8 +223,8 @@ anzu.startDownstream(
   }
 )
 ```
-<a name="Anzu+getDownstreamToken"></a>
-### anzu.getDownstreamToken(channelId, apiKey, date, signature)
+<a name="Anzu+generateDownstreamToken"></a>
+### anzu.generateDownstreamToken(channelId, apiKey, date, signature)
 ダウンストリームトークンを取得する
 
 **Kind**: instance method of <code>[Anzu](#Anzu)</code>  
@@ -239,7 +239,7 @@ anzu.startDownstream(
 **Example**  
 ```js
 var anzu = new Anzu();
-anzu.getDownstreamToken("channelId", "apiKey", "2015-01-01T00:00:00.000000", "signature")
+anzu.generatetDownstreamToken("channelId", "apiKey", "2015-01-01T00:00:00.000000", "signature")
     .then(function(response) {
       console.log(response.downstreamToken);
     });
