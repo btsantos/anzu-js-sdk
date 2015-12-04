@@ -153,16 +153,16 @@ class Anzu {
    * @param {string} signature - シグネチャー
    * @example
    * var anzu = new Anzu();
-   * anzu.getDownstreamToken("channelId", "apiKey", "2015-01-01T00:00:00.000000", "signature")
+   * anzu.generatetDownstreamToken("channelId", "apiKey", "2015-01-01T00:00:00.000000", "signature")
    *     .then(function(response) {
    *       console.log(response.downstreamToken);
    *     });
    */
-  getDownstreamToken(channelId, apiKey, date, signature) {
+  generateDownstreamToken(channelId, apiKey, date, signature) {
     return fetch(this.url, {
       method: "POST",
       headers: {
-        "x-anzu-target": "AnzuAPI_20151216.GetDownstreamToken",
+        "x-anzu-target": "AnzuAPI_20151216.GenerateDownstreamToken",
         "x-anzu-apikey": apiKey,
         "x-anzu-date": date,
         "x-anzu-signature": signature
