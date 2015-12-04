@@ -1,5 +1,5 @@
 import Sora from "sora-js-sdk";
-import request from "superagent";
+import fetch from "isomorphic-fetch";
 
 
 let RTCPeerConnection = window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
@@ -151,30 +151,29 @@ class Anzu {
    * @param {string} apiKey - APIキー
    * @param {string} date - 日時
    * @param {string} signature - シグネチャー
-   * @param {onEndCallback} onEnd - レスポンスハンドラーコールバック
    * @example
    * var anzu = new Anzu();
-   * anzu.getDownstreamToken(
-   *   "channelId",
-   *   "apiKey",
-   *   "2015-01-01T00:00:00.000000"
-   *   "signature"
-   *   function(error, response) {
-   *     // response handler
-   *   },
-   * )
+   * anzu.getDownstreamToken("channelId", "apiKey", "2015-01-01T00:00:00.000000", "signature")
+   *     .then(function(response) {
+   *       console.log(response.downstreamToken);
+   *     });
    */
-  getDownstreamToken(channelId, apiKey, date, signature, onEnd) {
-    request
-      .post(this.url)
-      .set("x-anzu-target", "AnzuAPI_20151216.GetDownstreamToken")
-      .set("x-anzu-apikey", apiKey)
-      .set("x-anzu-date", date)
-      .set("x-anzu-signature", signature)
-      .send({channelId: channelId})
-      .end((e, res) => {
-        onEnd(e, res);
-      });
+  getDownstreamToken(channelId, apiKey, date, signature) {
+    return fetch(this.url, {
+      method: "POST",
+      headers: {
+        "x-anzu-target": "AnzuAPI_20151216.GetDownstreamToken",
+        "x-anzu-apikey": apiKey,
+        "x-anzu-date": date,
+        "x-anzu-signature": signature
+      },
+      body: JSON.stringify({channelId: channelId})
+    }).then((response) => {
+      if (response.status !== 200) {
+        throw new Error(response.statusText);
+      }
+      return response.json();
+    });
   }
   /**
    * 特定の接続を切断する
@@ -183,31 +182,27 @@ class Anzu {
    * @param {string} apiKey - APIキー
    * @param {string} date - 日時
    * @param {string} signature - シグネチャー
-   * @param {onEndCallback} onEnd - レスポンスハンドラーコールバック
    * @example
    * var anzu = new Anzu();
-   * anzu.removeConnection(
-   *   "channelId",
-   *   "clientId",
-   *   "apiKey",
-   *   "2015-01-01T00:00:00.000000"
-   *   "signature"
-   *   function(error, response) {
-   *     // response handler
-   *   },
-   * )
+   * anzu.removeConnection("channelId", "clientId", "apiKey", "2015-01-01T00:00:00.000000" "signature")
+   *     .then(function(response) { });
    */
-  disconnect(channelId, clientId, apiKey, date, signature, onEnd) {
-    request
-      .post(this.url)
-      .set("x-anzu-target", "AnzuAPI_20151216.Disconnect")
-      .set("x-anzu-apikey", apiKey)
-      .set("x-anzu-date", date)
-      .set("x-anzu-signature", signature)
-      .send({channelId: channelId, clientId: clientId})
-      .end((e, res) => {
-        onEnd(e, res);
-      });
+  disconnect(channelId, clientId, apiKey, date, signature) {
+    return fetch(this.url, {
+      method: "POST",
+      headers: {
+        "x-anzu-target": "AnzuAPI_20151216.Disconnect",
+        "x-anzu-apikey": apiKey,
+        "x-anzu-date": date,
+        "x-anzu-signature": signature
+      },
+      body: JSON.stringify({channelId: channelId, clientId: clientId})
+    }).then((response) => {
+      if (response.status !== 200) {
+        throw new Error(response.statusText);
+      }
+      return response.json();
+    });
   }
   /**
    * 接続の一覧を取得する
@@ -215,30 +210,27 @@ class Anzu {
    * @param {string} apiKey - APIキー
    * @param {string} date - 日時
    * @param {string} signature - シグネチャー
-   * @param {onEndCallback} onEnd - レスポンスハンドラーコールバック
    * @example
    * var anzu = new Anzu();
-   * anzu.listConnection(
-   *   "channelId",
-   *   "apiKey",
-   *   "2015-01-01T00:00:00.000000"
-   *   "signature"
-   *   function(error, response) {
-   *     // response handler
-   *   },
-   * )
+   * anzu.removeConnection("channelId", "apiKey", "2015-01-01T00:00:00.000000" "signature")
+   *     .then(function(response) { });
    */
-  listConnection(channelId, apiKey, date, signature, onEnd) {
-    request
-      .post(this.url)
-      .set("x-anzu-target", "AnzuAPI_20151216.ListConnections")
-      .set("x-anzu-apikey", apiKey)
-      .set("x-anzu-date", date)
-      .set("x-anzu-signature", signature)
-      .send({channelId: channelId})
-      .end((e, res) => {
-        onEnd(e, res);
-      });
+  listConnection(channelId, apiKey, date, signature) {
+    return fetch(this.url, {
+      method: "POST",
+      headers: {
+        "x-anzu-target": "AnzuAPI_20151216.ListConnections",
+        "x-anzu-apikey": apiKey,
+        "x-anzu-date": date,
+        "x-anzu-signature": signature
+      },
+      body: JSON.stringify({channelId: channelId})
+    }).then((response) => {
+      if (response.status !== 200) {
+        throw new Error(response.statusText);
+      }
+      return response.json();
+    });
   }
 }
 

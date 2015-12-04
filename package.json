@@ -49,7 +49,8 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
-    "superagent": "^1.4.0",
+    "es6-promise": "^3.0.2",
+    "isomorphic-fetch": "^2.2.0",
     "sora-js-sdk": "shiguredo/sora-js-sdk#develop"
   }
 }
