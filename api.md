@@ -12,9 +12,9 @@
 * [Anzu](#Anzu)
   * [.startUpstream(channelId, upstreamToken, constraints, videoElement, onSuccess, onError, onClose)](#Anzu+startUpstream)
   * [.startDownstream(channelId, downstreamToken, videoElement, onSuccess, onError, onClose)](#Anzu+startDownstream)
-  * [.getDownstreamToken(channelId, apiKey, date, signature, onEnd)](#Anzu+getDownstreamToken)
-  * [.disconnect(channelId, clientId, apiKey, date, signature, onEnd)](#Anzu+disconnect)
-  * [.listConnection(channelId, apiKey, date, signature, onEnd)](#Anzu+listConnection)
+  * [.getDownstreamToken(channelId, apiKey, date, signature)](#Anzu+getDownstreamToken)
+  * [.disconnect(channelId, clientId, apiKey, date, signature)](#Anzu+disconnect)
+  * [.listConnection(channelId, apiKey, date, signature)](#Anzu+listConnection)
 
 <a name="Anzu+startUpstream"></a>
 ### anzu.startUpstream(channelId, upstreamToken, constraints, videoElement, onSuccess, onError, onClose)
@@ -85,7 +85,7 @@ anzu.startDownstream(
 )
 ```
 <a name="Anzu+getDownstreamToken"></a>
-### anzu.getDownstreamToken(channelId, apiKey, date, signature, onEnd)
+### anzu.getDownstreamToken(channelId, apiKey, date, signature)
 ダウンストリームトークンを取得する
 
 **Kind**: instance method of <code>[Anzu](#Anzu)</code>  
@@ -96,23 +96,17 @@ anzu.startDownstream(
 | apiKey | <code>string</code> | APIキー |
 | date | <code>string</code> | 日時 |
 | signature | <code>string</code> | シグネチャー |
-| onEnd | <code>onEndCallback</code> | レスポンスハンドラーコールバック |
 
 **Example**  
 ```js
 var anzu = new Anzu();
-anzu.getDownstreamToken(
-  "channelId",
-  "apiKey",
-  "2015-01-01T00:00:00.000000"
-  "signature"
-  function(error, response) {
-    // response handler
-  },
-)
+anzu.getDownstreamToken("channelId", "apiKey", "2015-01-01T00:00:00.000000", "signature")
+    .then(function(response) {
+      console.log(response.downstreamToken);
+    });
 ```
 <a name="Anzu+disconnect"></a>
-### anzu.disconnect(channelId, clientId, apiKey, date, signature, onEnd)
+### anzu.disconnect(channelId, clientId, apiKey, date, signature)
 特定の接続を切断する
 
 **Kind**: instance method of <code>[Anzu](#Anzu)</code>  
@@ -124,24 +118,15 @@ anzu.getDownstreamToken(
 | apiKey | <code>string</code> | APIキー |
 | date | <code>string</code> | 日時 |
 | signature | <code>string</code> | シグネチャー |
-| onEnd | <code>onEndCallback</code> | レスポンスハンドラーコールバック |
 
 **Example**  
 ```js
 var anzu = new Anzu();
-anzu.removeConnection(
-  "channelId",
-  "clientId",
-  "apiKey",
-  "2015-01-01T00:00:00.000000"
-  "signature"
-  function(error, response) {
-    // response handler
-  },
-)
+anzu.removeConnection("channelId", "clientId", "apiKey", "2015-01-01T00:00:00.000000" "signature")
+    .then(function(response) { });
 ```
 <a name="Anzu+listConnection"></a>
-### anzu.listConnection(channelId, apiKey, date, signature, onEnd)
+### anzu.listConnection(channelId, apiKey, date, signature)
 接続の一覧を取得する
 
 **Kind**: instance method of <code>[Anzu](#Anzu)</code>  
@@ -152,20 +137,12 @@ anzu.removeConnection(
 | apiKey | <code>string</code> | APIキー |
 | date | <code>string</code> | 日時 |
 | signature | <code>string</code> | シグネチャー |
-| onEnd | <code>onEndCallback</code> | レスポンスハンドラーコールバック |
 
 **Example**  
 ```js
 var anzu = new Anzu();
-anzu.listConnection(
-  "channelId",
-  "apiKey",
-  "2015-01-01T00:00:00.000000"
-  "signature"
-  function(error, response) {
-    // response handler
-  },
-)
+anzu.removeConnection("channelId", "apiKey", "2015-01-01T00:00:00.000000" "signature")
+    .then(function(response) { });
 ```
 <a name="Anzu"></a>
 ## Anzu
@@ -174,9 +151,9 @@ anzu.listConnection(
 * [Anzu](#Anzu)
   * [.startUpstream(channelId, upstreamToken, constraints, videoElement, onSuccess, onError, onClose)](#Anzu+startUpstream)
   * [.startDownstream(channelId, downstreamToken, videoElement, onSuccess, onError, onClose)](#Anzu+startDownstream)
-  * [.getDownstreamToken(channelId, apiKey, date, signature, onEnd)](#Anzu+getDownstreamToken)
-  * [.disconnect(channelId, clientId, apiKey, date, signature, onEnd)](#Anzu+disconnect)
-  * [.listConnection(channelId, apiKey, date, signature, onEnd)](#Anzu+listConnection)
+  * [.getDownstreamToken(channelId, apiKey, date, signature)](#Anzu+getDownstreamToken)
+  * [.disconnect(channelId, clientId, apiKey, date, signature)](#Anzu+disconnect)
+  * [.listConnection(channelId, apiKey, date, signature)](#Anzu+listConnection)
 
 <a name="Anzu+startUpstream"></a>
 ### anzu.startUpstream(channelId, upstreamToken, constraints, videoElement, onSuccess, onError, onClose)
@@ -247,7 +224,7 @@ anzu.startDownstream(
 )
 ```
 <a name="Anzu+getDownstreamToken"></a>
-### anzu.getDownstreamToken(channelId, apiKey, date, signature, onEnd)
+### anzu.getDownstreamToken(channelId, apiKey, date, signature)
 ダウンストリームトークンを取得する
 
 **Kind**: instance method of <code>[Anzu](#Anzu)</code>  
@@ -258,23 +235,17 @@ anzu.startDownstream(
 | apiKey | <code>string</code> | APIキー |
 | date | <code>string</code> | 日時 |
 | signature | <code>string</code> | シグネチャー |
-| onEnd | <code>onEndCallback</code> | レスポンスハンドラーコールバック |
 
 **Example**  
 ```js
 var anzu = new Anzu();
-anzu.getDownstreamToken(
-  "channelId",
-  "apiKey",
-  "2015-01-01T00:00:00.000000"
-  "signature"
-  function(error, response) {
-    // response handler
-  },
-)
+anzu.getDownstreamToken("channelId", "apiKey", "2015-01-01T00:00:00.000000", "signature")
+    .then(function(response) {
+      console.log(response.downstreamToken);
+    });
 ```
 <a name="Anzu+disconnect"></a>
-### anzu.disconnect(channelId, clientId, apiKey, date, signature, onEnd)
+### anzu.disconnect(channelId, clientId, apiKey, date, signature)
 特定の接続を切断する
 
 **Kind**: instance method of <code>[Anzu](#Anzu)</code>  
@@ -286,24 +257,15 @@ anzu.getDownstreamToken(
 | apiKey | <code>string</code> | APIキー |
 | date | <code>string</code> | 日時 |
 | signature | <code>string</code> | シグネチャー |
-| onEnd | <code>onEndCallback</code> | レスポンスハンドラーコールバック |
 
 **Example**  
 ```js
 var anzu = new Anzu();
-anzu.removeConnection(
-  "channelId",
-  "clientId",
-  "apiKey",
-  "2015-01-01T00:00:00.000000"
-  "signature"
-  function(error, response) {
-    // response handler
-  },
-)
+anzu.removeConnection("channelId", "clientId", "apiKey", "2015-01-01T00:00:00.000000" "signature")
+    .then(function(response) { });
 ```
 <a name="Anzu+listConnection"></a>
-### anzu.listConnection(channelId, apiKey, date, signature, onEnd)
+### anzu.listConnection(channelId, apiKey, date, signature)
 接続の一覧を取得する
 
 **Kind**: instance method of <code>[Anzu](#Anzu)</code>  
@@ -314,18 +276,10 @@ anzu.removeConnection(
 | apiKey | <code>string</code> | APIキー |
 | date | <code>string</code> | 日時 |
 | signature | <code>string</code> | シグネチャー |
-| onEnd | <code>onEndCallback</code> | レスポンスハンドラーコールバック |
 
 **Example**  
 ```js
 var anzu = new Anzu();
-anzu.listConnection(
-  "channelId",
-  "apiKey",
-  "2015-01-01T00:00:00.000000"
-  "signature"
-  function(error, response) {
-    // response handler
-  },
-)
+anzu.removeConnection("channelId", "apiKey", "2015-01-01T00:00:00.000000" "signature")
+    .then(function(response) { });
 ```
