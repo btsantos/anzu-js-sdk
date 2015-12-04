@@ -43,36 +43,14 @@ $("#start").on("click", function() {
   upstream();
 
   setTimeout(function() {
-    anzu.getDownstreamToken(
-      channelId,
-      apiKey,
-      datetime,
-      signature,
-      function(error, response) {
-        if (error !== null) {
-          console.error(error);
-        }
-        else {
-          var downstreamToken = JSON.parse(response.text).downstreamToken;
-          downstream(downstreamToken, document.getElementById("remote-video1"));
-        }
-      }
-    );
-    anzu.getDownstreamToken(
-      channelId,
-      apiKey,
-      datetime,
-      signature,
-      function(error, response) {
-        if (error !== null) {
-          console.error(error);
-        }
-        else {
-          var downstreamToken = JSON.parse(response.text).downstreamToken;
-          downstream(downstreamToken, document.getElementById("remote-video2"));
-        }
-      }
-    );
+    anzu.getDownstreamToken(channelId, apiKey, datetime, signature)
+        .then(function(response) {
+          downstream(response.downstreamToken, document.getElementById("remote-video1"));
+        });
+    anzu.getDownstreamToken(channelId, apiKey, datetime, signature)
+        .then(function(response) {
+          downstream(response.downstreamToken, document.getElementById("remote-video2"));
+        });
   }, 2000)
 
   setTimeout(function() {
@@ -119,25 +97,25 @@ function downstream(downstreamToken, element) {
 }
 
 function listConnection() {
-  anzu.listConnection(channelId, apiKey, datetime, signature, function(error, response) {
-    var data = JSON.parse(response.text);
-    $("#connections").html("");
-    $.each(data, function(_, connection) {
-      var li = $("<li>");
-      $.each(connection, function(key, value) {
-        li.append("<p>" + key + ": " + value + "</p>");
-      })
-      var button = $("<button>切断</button>");
-      button.on("click", function() {
-        anzu.disconnect(connection.channelId, connection.clientId, apiKey, datetime, signature, function(error, response) {
-          console.log("- disconnect -");
-          console.log(response);
+  anzu.listConnection(channelId, apiKey, datetime, signature)
+    .then(function(response) {
+      $("#connections").html("");
+      $.each(response, function(_, connection) {
+        var li = $("<li>");
+        $.each(connection, function(key, value) {
+          li.append("<p>" + key + ": " + value + "</p>");
         })
+        var button = $("<button>切断</button>");
+        button.on("click", function() {
+          anzu.disconnect(connection.channelId, connection.clientId, apiKey, datetime, signature)
+            .then(function(response) {
+              console.log("- coco -");
+            })
+        });
+        li.append(button);
+        $("#connections").append(li);
       });
-      li.append(button);
-      $("#connections").append(li);
     });
-  });
 }
 
     </script>
