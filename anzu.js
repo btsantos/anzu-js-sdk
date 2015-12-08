@@ -55,10 +55,7 @@ class Anzu {
           videoElement.src = window.URL.createObjectURL(stream);
           videoElement.play();
           connection.connect({role: "upstream", channelId: channelId, accessToken: upstreamToken}, (message) => {
-            let config = {
-              "iceServers": [{"urls": "stun:160.16.224.159:3478"}]
-            };
-            let pc = new RTCPeerConnection(config);
+            let pc = new RTCPeerConnection(message.iceServers);
             pc.addStream(stream);
             pc.setRemoteDescription(new RTCSessionDescription(message), function() {
               pc.createAnswer(function(answer) {
@@ -114,10 +111,7 @@ class Anzu {
     let connection = this.sora.connection(
       () => {
         connection.connect({role: "downstream", channelId: channelId, accessToken: downstreamToken}, (message) => {
-          let config = {
-            "iceServers": [{"urls": "stun:160.16.224.159:3478"}]
-          };
-          let pc = new RTCPeerConnection(config);
+          let pc = new RTCPeerConnection(message.iceServers);
           pc.setRemoteDescription(new RTCSessionDescription(message), () => {
             pc.createAnswer((answer) => {
               pc.setLocalDescription(answer, () => {
