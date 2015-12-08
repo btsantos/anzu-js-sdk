@@ -80,18 +80,25 @@ var Anzu = (function () {
           videoElement.src = window.URL.createObjectURL(stream);
           videoElement.play();
           connection.connect({ role: "upstream", channelId: channelId, accessToken: upstreamToken }, function (message) {
-            var config = {
-              "iceServers": [{ "urls": "stun:160.16.224.159:3478" }]
-            };
-            var pc = new RTCPeerConnection(config);
+            console.log("====== offer ======");
+            console.log(message);
+            console.log("====== offer sdp ======");
+            console.log(message.sdp);
+            var pc = new RTCPeerConnection(message.iceServers);
             pc.addStream(stream);
             pc.setRemoteDescription(new RTCSessionDescription(message), function () {
               pc.createAnswer(function (answer) {
+                console.log("====== answer ======");
+                console.log(answer);
+                console.log("====== answer sdp ======");
+                console.log(answer.sdp);
                 pc.setLocalDescription(answer, function () {
                   connection.answer(answer.sdp);
                   onSuccess();
                   pc.onicecandidate = function (event) {
                     if (event.candidate !== null) {
+                      console.log("====== candidate ======");
+                      console.log(event.candidate);
                       connection.candidate(event.candidate);
                     }
                   };
@@ -138,17 +145,24 @@ var Anzu = (function () {
     value: function startDownstream(channelId, downstreamToken, videoElement, onSuccess, onError, onClose) {
       var connection = this.sora.connection(function () {
         connection.connect({ role: "downstream", channelId: channelId, accessToken: downstreamToken }, function (message) {
-          var config = {
-            "iceServers": [{ "urls": "stun:160.16.224.159:3478" }]
-          };
-          var pc = new RTCPeerConnection(config);
+          console.log("====== offer ======");
+          console.log(message);
+          console.log("====== offer sdp ======");
+          console.log(message.sdp);
+          var pc = new RTCPeerConnection(message.iceServers);
           pc.setRemoteDescription(new RTCSessionDescription(message), function () {
             pc.createAnswer(function (answer) {
+              console.log("====== answer ======");
+              console.log(answer);
+              console.log("====== answer sdp ======");
+              console.log(answer.sdp);
               pc.setLocalDescription(answer, function () {
                 connection.answer(answer.sdp);
                 onSuccess();
                 pc.onicecandidate = function (event) {
                   if (event.candidate !== null) {
+                    console.log("====== candidate ======");
+                    console.log(event.candidate);
                     connection.candidate(event.candidate);
                   }
                 };
