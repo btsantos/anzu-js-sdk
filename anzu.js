@@ -55,15 +55,25 @@ class Anzu {
           videoElement.src = window.URL.createObjectURL(stream);
           videoElement.play();
           connection.connect({role: "upstream", channelId: channelId, accessToken: upstreamToken}, (message) => {
+            console.log("====== offer ======");
+            console.log(message);
+            console.log("====== offer sdp ======");
+            console.log(message.sdp);
             let pc = new RTCPeerConnection(message.iceServers);
             pc.addStream(stream);
             pc.setRemoteDescription(new RTCSessionDescription(message), function() {
               pc.createAnswer(function(answer) {
+                console.log("====== answer ======");
+                console.log(answer);
+                console.log("====== answer sdp ======");
+                console.log(answer.sdp);
                 pc.setLocalDescription(answer, function() {
                   connection.answer(answer.sdp);
                   onSuccess();
                   pc.onicecandidate = function(event) {
                     if (event.candidate !== null) {
+                      console.log("====== candidate ======");
+                      console.log(event.candidate);
                       connection.candidate(event.candidate);
                     }
                   };
@@ -111,14 +121,24 @@ class Anzu {
     let connection = this.sora.connection(
       () => {
         connection.connect({role: "downstream", channelId: channelId, accessToken: downstreamToken}, (message) => {
+          console.log("====== offer ======");
+          console.log(message);
+          console.log("====== offer sdp ======");
+          console.log(message.sdp);
           let pc = new RTCPeerConnection(message.iceServers);
           pc.setRemoteDescription(new RTCSessionDescription(message), () => {
             pc.createAnswer((answer) => {
+              console.log("====== answer ======");
+              console.log(answer);
+              console.log("====== answer sdp ======");
+              console.log(answer.sdp);
               pc.setLocalDescription(answer, () => {
                 connection.answer(answer.sdp);
                 onSuccess();
                 pc.onicecandidate = (event) => {
                   if (event.candidate !== null) {
+                    console.log("====== candidate ======");
+                    console.log(event.candidate);
                     connection.candidate(event.candidate);
                   }
                 };
