@@ -86,7 +86,7 @@ var Anzu = (function () {
             console.log(message.sdp);
             console.log("====== iceServers ======");
             console.log(message.iceServers);
-            var pc = new RTCPeerConnection(message.iceServers);
+            var pc = new RTCPeerConnection({ iceServers: message.iceServers });
             pc.addStream(stream);
             pc.setRemoteDescription(new RTCSessionDescription(message), function () {
               pc.createAnswer(function (answer) {
@@ -153,7 +153,7 @@ var Anzu = (function () {
           console.log(message.sdp);
           console.log("====== iceServers ======");
           console.log(message.iceServers);
-          var pc = new RTCPeerConnection(message.iceServers);
+          var pc = new RTCPeerConnection({ iceServers: message.iceServers });
           pc.setRemoteDescription(new RTCSessionDescription(message), function () {
             pc.createAnswer(function (answer) {
               console.log("====== answer ======");
