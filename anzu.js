@@ -17,9 +17,8 @@ class Anzu {
    * @constructor
    */
   constructor(params={anzuUrl: null, soraUrl: null}) {
-    // TODO(yuito): url を修正する
-    this.url = params.anzuUrl === null ? "http://localhost:8000/api/" : params.anzuUrl;
-    this.sora = new Sora(params.soraUrl === null ? "ws://127.0.0.1:8000/signaling" : params.soraUrl);
+    this.url = params.anzuUrl === null ? "https://anzu.shiguredo.jp/api/" : params.anzuUrl;
+    this.sora = new Sora(params.soraUrl === null ? "wss://anzu.shiguredo.jp/signaling" : params.soraUrl);
     this.upstreamPc;
     this.downstreamPc = {};
   }
