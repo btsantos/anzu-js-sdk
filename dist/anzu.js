@@ -40,9 +40,8 @@ var Anzu = (function () {
 
     _classCallCheck(this, Anzu);
 
-    // TODO(yuito): url を修正する
-    this.url = params.anzuUrl === null ? "http://localhost:8000/api/" : params.anzuUrl;
-    this.sora = new _soraJsSdk2.default(params.soraUrl === null ? "ws://127.0.0.1:8000/signaling" : params.soraUrl);
+    this.url = params.anzuUrl === null ? "https://anzu.shiguredo.jp/api/" : params.anzuUrl;
+    this.sora = new _soraJsSdk2.default(params.soraUrl === null ? "wss://anzu.shiguredo.jp/signaling" : params.soraUrl);
     this.upstreamPc;
     this.downstreamPc = {};
   }
@@ -226,6 +225,10 @@ var Anzu = (function () {
           }, function (error) {
             reject(error);
           });
+          pc.onaddstream = function (event) {
+            videoElement.src = window.URL.createObjectURL(event.stream);
+            videoElement.play();
+          };
         });
       };
       var connection = this.sora.connection(function () {
@@ -251,10 +254,6 @@ var Anzu = (function () {
                 }
               };
             }, onError);
-            pc.onaddstream = function (event) {
-              videoElement.src = window.URL.createObjectURL(event.stream);
-              videoElement.play();
-            };
             _this2.downstreamPc[clientId] = pc;
           });
         }).then(function () {
