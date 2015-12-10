@@ -18,8 +18,10 @@ class Anzu {
    */
   constructor(params={anzuUrl: null, soraUrl: null}) {
     // TODO(yuito): url を修正する
-    this.url = params.anzuUrl === null ? "http://localhost:8000/" : params.anzuUrl;
+    this.url = params.anzuUrl === null ? "http://localhost:8000/api/" : params.anzuUrl;
     this.sora = new Sora(params.soraUrl === null ? "ws://127.0.0.1:8000/signaling" : params.soraUrl);
+    this.upstreamPc;
+    this.downstreamPc = {};
   }
   /**
    * アップストリームを開始する
@@ -49,47 +51,97 @@ class Anzu {
    * )
    */
   startUpstream(channelId, upstreamToken, constraints, videoElement, onSuccess, onError, onClose) {
+    let _getUserMedia = (constraints) => {
+      return new Promise((resolve, reject) => {
+        if (navigator.getUserMedia) {
+          navigator.getUserMedia(constraints,
+            (stream) => {
+              resolve(stream);
+            },
+            (err) => {
+              reject(err);
+            }
+          );
+        } else {
+          reject(message);
+        }
+      });
+    };
+    let _createPeerConnection = (params) => {
+      console.log("====== offer ======");
+      console.log(params.offer);
+      console.log("====== offer sdp ======");
+      console.log(params.offer.sdp);
+      let offer = params.offer;
+      let stream = params.stream;
+      return new Promise((resolve, reject) => {
+        let pc = new RTCPeerConnection({iceServers: offer.iceServers});
+        pc.addStream(stream);
+        resolve({pc: pc, offer: offer});
+      });
+    };
+    let _createAnswer = (params) => {
+      let pc = params.pc;
+      let offer = params.offer;
+      return new Promise((resolve, reject) => {
+        pc.setRemoteDescription(new RTCSessionDescription(offer), () => {
+          pc.createAnswer((answer) => {
+            console.log("====== answer ======");
+            console.log(answer);
+            console.log("====== answer sdp ======");
+            console.log(answer.sdp);
+            resolve({pc: pc, answer: answer});
+          }, (error) => { reject(error); });
+        }, (error) => { reject(error); });
+      });
+    };
     let connection = this.sora.connection(
       () => {
-        navigator.getUserMedia(constraints, function(stream) {
-          videoElement.src = window.URL.createObjectURL(stream);
-          videoElement.play();
-          connection.connect({role: "upstream", channelId: channelId, accessToken: upstreamToken}, (message) => {
-            console.log("====== offer ======");
-            console.log(message);
-            console.log("====== offer sdp ======");
-            console.log(message.sdp);
-            console.log("====== iceServers ======");
-            console.log(message.iceServers);
-            let pc = new RTCPeerConnection({iceServers: message.iceServers});
-            pc.addStream(stream);
-            pc.setRemoteDescription(new RTCSessionDescription(message), function() {
-              pc.createAnswer(function(answer) {
-                console.log("====== answer ======");
-                console.log(answer);
-                console.log("====== answer sdp ======");
-                console.log(answer.sdp);
-                pc.setLocalDescription(answer, function() {
-                  connection.answer(answer.sdp);
-                  onSuccess();
-                  pc.onicecandidate = function(event) {
-                    if (event.candidate !== null) {
-                      console.log("====== candidate ======");
-                      console.log(event.candidate);
-                      connection.candidate(event.candidate);
-                    }
-                  };
-                }, onError);
-              }, onError);
-            }, onError);
-          }, onError);
-        }, onError);
+        _getUserMedia(constraints)
+          .then((stream) => {
+            return new Promise((resolve, reject) => {
+              videoElement.src = window.URL.createObjectURL(stream);
+              videoElement.play();
+              let params = {role: "upstream", channelId: channelId, accessToken: upstreamToken};
+              connection.connect(
+                params,
+                (offer) => { resolve({offer: offer, stream: stream}); },
+                (error) => { reject(error); }
+              );
+            });
+          })
+          .then(_createPeerConnection)
+          .then(_createAnswer)
+          .then((params) => {
+            return new Promise((resolve, reject) => {
+              let pc = params.pc;
+              let answer = params.answer;
+              pc.setLocalDescription(answer, () => {
+                connection.answer(answer.sdp);
+                pc.onicecandidate = (event) => {
+                  if (event.candidate !== null) {
+                    console.log("====== candidate ======");
+                    console.log(event.candidate);
+                    connection.candidate(event.candidate);
+                  }
+                };
+              }, (error) => { reject(error); });
+              this.upstreamPc = pc;
+            });
+          })
+          .then(() => {
+            onSuccess();
+          })
+          .catch((error) => {
+            onError(error);
+          });
       },
       onError,
       (e) => {
         videoElement.pause();
         videoElement.src = "";
         connection = null;
+        this.upstreamPc = null;
         onClose(e);
       }
     );
@@ -120,40 +172,72 @@ class Anzu {
    * )
    */
   startDownstream(channelId, downstreamToken, videoElement, onSuccess, onError, onClose) {
+    let _createPeerConnection = (params) => {
+      console.log("====== offer ======");
+      console.log(params.offer);
+      console.log("====== offer sdp ======");
+      console.log(params.offer.sdp);
+      return new Promise((resolve, reject) => {
+        let offer = params.offer;
+        let pc = new RTCPeerConnection({iceServers: offer.iceServers});
+        resolve({pc: pc, offer: offer});
+      });
+    };
+    let _createAnswer = (params) => {
+      let pc = params.pc;
+      let offer = params.offer;
+      return new Promise((resolve, reject) => {
+        pc.setRemoteDescription(new RTCSessionDescription(offer), () => {
+          pc.createAnswer((answer) => {
+            console.log("====== answer ======");
+            console.log(answer);
+            console.log("====== answer sdp ======");
+            console.log(answer.sdp);
+            resolve({pc: pc, offer: offer, answer: answer});
+          }, (error) => { reject(error); });
+        }, (error) => { reject(error); });
+      });
+    };
     let connection = this.sora.connection(
       () => {
-        connection.connect({role: "downstream", channelId: channelId, accessToken: downstreamToken}, (message) => {
-          console.log("====== offer ======");
-          console.log(message);
-          console.log("====== offer sdp ======");
-          console.log(message.sdp);
-          console.log("====== iceServers ======");
-          console.log(message.iceServers);
-          let pc = new RTCPeerConnection({iceServers: message.iceServers});
-          pc.setRemoteDescription(new RTCSessionDescription(message), () => {
-            pc.createAnswer((answer) => {
-              console.log("====== answer ======");
-              console.log(answer);
-              console.log("====== answer sdp ======");
-              console.log(answer.sdp);
-              pc.setLocalDescription(answer, () => {
-                connection.answer(answer.sdp);
-                onSuccess();
-                pc.onicecandidate = (event) => {
-                  if (event.candidate !== null) {
-                    console.log("====== candidate ======");
-                    console.log(event.candidate);
-                    connection.candidate(event.candidate);
-                  }
-                };
-              }, onError);
+        new Promise((resolve, reject) => {
+          let params = {role: "downstream", channelId: channelId, accessToken: downstreamToken};
+          connection.connect(
+            params,
+            (offer) => { resolve({offer: offer}); },
+            (error) => { reject(error); }
+          );
+        })
+        .then(_createPeerConnection)
+        .then(_createAnswer)
+        .then((params) => {
+          return new Promise((resolve, reject) => {
+            let pc = params.pc;
+            let answer = params.answer;
+            let clientId = params.offer.clientId;
+            pc.setLocalDescription(answer, () => {
+              connection.answer(answer.sdp);
+              pc.onicecandidate = (event) => {
+                if (event.candidate !== null) {
+                  console.log("====== candidate ======");
+                  console.log(event.candidate);
+                  connection.candidate(event.candidate);
+                }
+              };
             }, onError);
-          }, onError);
-          pc.onaddstream = (event) => {
-            videoElement.src = window.URL.createObjectURL(event.stream);
-            videoElement.play();
-          };
-        }, onError);
+            pc.onaddstream = (event) => {
+              videoElement.src = window.URL.createObjectURL(event.stream);
+              videoElement.play();
+            };
+            this.downstreamPc[clientId] = pc;
+          });
+        })
+        .then(() => {
+          onSuccess();
+        })
+        .catch((error) => {
+          onError(error);
+        });
       },
       onError,
       (e) => {
