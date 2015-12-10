@@ -195,6 +195,10 @@ class Anzu {
             resolve({pc: pc, offer: offer, answer: answer});
           }, (error) => { reject(error); });
         }, (error) => { reject(error); });
+        pc.onaddstream = (event) => {
+          videoElement.src = window.URL.createObjectURL(event.stream);
+          videoElement.play();
+        };
       });
     };
     let connection = this.sora.connection(
@@ -224,10 +228,6 @@ class Anzu {
                 }
               };
             }, onError);
-            pc.onaddstream = (event) => {
-              videoElement.src = window.URL.createObjectURL(event.stream);
-              videoElement.play();
-            };
             this.downstreamPc[clientId] = pc;
           });
         })
