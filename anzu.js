@@ -67,10 +67,7 @@ class Anzu {
       });
     };
     let _createPeerConnection = (params) => {
-      console.log("====== offer ======");
-      console.log(params.offer);
-      console.log("====== offer sdp ======");
-      console.log(params.offer.sdp);
+      this.sdplog("Upstream Offer", params.offer);
       let offer = params.offer;
       let stream = params.stream;
       return new Promise((resolve, reject) => {
@@ -85,10 +82,7 @@ class Anzu {
       return new Promise((resolve, reject) => {
         pc.setRemoteDescription(new RTCSessionDescription(offer), () => {
           pc.createAnswer((answer) => {
-            console.log("====== answer ======");
-            console.log(answer);
-            console.log("====== answer sdp ======");
-            console.log(answer.sdp);
+            this.sdplog("Upstream answer", params.offer);
             resolve({pc: pc, answer: answer});
           }, (error) => { reject(error); });
         }, (error) => { reject(error); });
@@ -119,8 +113,8 @@ class Anzu {
                 connection.answer(answer.sdp);
                 pc.onicecandidate = (event) => {
                   if (event.candidate !== null) {
-                    console.log("====== candidate ======");
-                    console.log(event.candidate);
+                    console.info("====== candidate ======");
+                    console.info(event.candidate);
                     connection.candidate(event.candidate);
                   }
                 };
@@ -172,10 +166,7 @@ class Anzu {
    */
   startDownstream(channelId, downstreamToken, videoElement, onSuccess, onError, onClose) {
     let _createPeerConnection = (params) => {
-      console.log("====== offer ======");
-      console.log(params.offer);
-      console.log("====== offer sdp ======");
-      console.log(params.offer.sdp);
+      this.sdplog("Downstream offer", params.offer);
       return new Promise((resolve, reject) => {
         let offer = params.offer;
         let pc = new RTCPeerConnection({iceServers: offer.iceServers});
@@ -188,10 +179,7 @@ class Anzu {
       return new Promise((resolve, reject) => {
         pc.setRemoteDescription(new RTCSessionDescription(offer), () => {
           pc.createAnswer((answer) => {
-            console.log("====== answer ======");
-            console.log(answer);
-            console.log("====== answer sdp ======");
-            console.log(answer.sdp);
+            this.sdplog("Downstream answer", params.offer);
             resolve({pc: pc, offer: offer, answer: answer});
           }, (error) => { reject(error); });
         }, (error) => { reject(error); });
@@ -222,8 +210,8 @@ class Anzu {
               connection.answer(answer.sdp);
               pc.onicecandidate = (event) => {
                 if (event.candidate !== null) {
-                  console.log("====== candidate ======");
-                  console.log(event.candidate);
+                  console.info("====== candidate ======");
+                  console.info(event.candidate);
                   connection.candidate(event.candidate);
                 }
               };
@@ -332,6 +320,13 @@ class Anzu {
       }
       return response.json();
     });
+  }
+  sdplog(title, target) {
+    console.info("========== " + title + " ==========");
+    for (let i in target) {
+      console.info(i + ":");
+      console.info(target[i]);
+    }
   }
 }
 
