@@ -92,10 +92,7 @@ var Anzu = (function () {
         });
       };
       var _createPeerConnection = function _createPeerConnection(params) {
-        console.log("====== offer ======");
-        console.log(params.offer);
-        console.log("====== offer sdp ======");
-        console.log(params.offer.sdp);
+        _this.sdplog("Upstream Offer", params.offer);
         var offer = params.offer;
         var stream = params.stream;
         return new Promise(function (resolve, reject) {
@@ -110,10 +107,7 @@ var Anzu = (function () {
         return new Promise(function (resolve, reject) {
           pc.setRemoteDescription(new RTCSessionDescription(offer), function () {
             pc.createAnswer(function (answer) {
-              console.log("====== answer ======");
-              console.log(answer);
-              console.log("====== answer sdp ======");
-              console.log(answer.sdp);
+              _this.sdplog("Upstream answer", params.offer);
               resolve({ pc: pc, answer: answer });
             }, function (error) {
               reject(error);
@@ -143,8 +137,8 @@ var Anzu = (function () {
               connection.answer(answer.sdp);
               pc.onicecandidate = function (event) {
                 if (event.candidate !== null) {
-                  console.log("====== candidate ======");
-                  console.log(event.candidate);
+                  console.info("====== candidate ======");
+                  console.info(event.candidate);
                   connection.candidate(event.candidate);
                 }
               };
@@ -198,10 +192,7 @@ var Anzu = (function () {
       var _this2 = this;
 
       var _createPeerConnection = function _createPeerConnection(params) {
-        console.log("====== offer ======");
-        console.log(params.offer);
-        console.log("====== offer sdp ======");
-        console.log(params.offer.sdp);
+        _this2.sdplog("Downstream offer", params.offer);
         return new Promise(function (resolve, reject) {
           var offer = params.offer;
           var pc = new RTCPeerConnection({ iceServers: offer.iceServers });
@@ -214,10 +205,7 @@ var Anzu = (function () {
         return new Promise(function (resolve, reject) {
           pc.setRemoteDescription(new RTCSessionDescription(offer), function () {
             pc.createAnswer(function (answer) {
-              console.log("====== answer ======");
-              console.log(answer);
-              console.log("====== answer sdp ======");
-              console.log(answer.sdp);
+              _this2.sdplog("Downstream answer", params.offer);
               resolve({ pc: pc, offer: offer, answer: answer });
             }, function (error) {
               reject(error);
@@ -248,8 +236,8 @@ var Anzu = (function () {
               connection.answer(answer.sdp);
               pc.onicecandidate = function (event) {
                 if (event.candidate !== null) {
-                  console.log("====== candidate ======");
-                  console.log(event.candidate);
+                  console.info("====== candidate ======");
+                  console.info(event.candidate);
                   connection.candidate(event.candidate);
                 }
               };
@@ -362,6 +350,15 @@ var Anzu = (function () {
         }
         return response.json();
       });
+    }
+  }, {
+    key: "sdplog",
+    value: function sdplog(title, target) {
+      console.info("========== " + title + " ==========");
+      for (var i in target) {
+        console.info(i + ":");
+        console.info(target[i]);
+      }
     }
   }]);
 
