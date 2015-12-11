@@ -38,7 +38,7 @@ class Anzu {
    *   "token",
    *   {video: true},
    *   document.getElementById("local-video"),
-   *   function() {
+   *   function(clientId) {
    *     // success
    *   },
    *   function(error) {
@@ -83,7 +83,7 @@ class Anzu {
         pc.setRemoteDescription(new RTCSessionDescription(offer), () => {
           pc.createAnswer((answer) => {
             this.sdplog("Upstream answer", params.offer);
-            resolve({pc: pc, answer: answer});
+            resolve({pc: pc, answer: answer, offer: offer});
           }, (error) => { reject(error); });
         }, (error) => { reject(error); });
       });
@@ -109,8 +109,11 @@ class Anzu {
             return new Promise((resolve, reject) => {
               let pc = params.pc;
               let answer = params.answer;
+              let offer = params.offer;
               pc.setLocalDescription(answer, () => {
                 connection.answer(answer.sdp);
+                this.upstreamPc = pc;
+                resolve(params.offer.clientId)
                 pc.onicecandidate = (event) => {
                   if (event.candidate !== null) {
                     console.info("====== candidate ======");
@@ -119,11 +122,10 @@ class Anzu {
                   }
                 };
               }, (error) => { reject(error); });
-              this.upstreamPc = pc;
             });
           })
-          .then(() => {
-            onSuccess();
+          .then((clientId) => {
+            onSuccess(clientId);
           })
           .catch((error) => {
             onError(error);
@@ -153,7 +155,7 @@ class Anzu {
    *   "channelId",
    *   "token",
    *   document.getElementById("remote-video"),
-   *   function() {
+   *   function(clientId) {
    *     // success
    *   },
    *   function(error) {
@@ -208,6 +210,8 @@ class Anzu {
             let clientId = params.offer.clientId;
             pc.setLocalDescription(answer, () => {
               connection.answer(answer.sdp);
+              this.downstreamPc[clientId] = pc;
+              resolve(clientId)
               pc.onicecandidate = (event) => {
                 if (event.candidate !== null) {
                   console.info("====== candidate ======");
@@ -216,11 +220,10 @@ class Anzu {
                 }
               };
             }, onError);
-            this.downstreamPc[clientId] = pc;
           });
         })
-        .then(() => {
-          onSuccess();
+        .then((clientId) => {
+          onSuccess(clientId);
         })
         .catch((error) => {
           onError(error);
