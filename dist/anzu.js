@@ -61,7 +61,7 @@ var Anzu = (function () {
    *   "token",
    *   {video: true},
    *   document.getElementById("local-video"),
-   *   function() {
+   *   function(clientId) {
    *     // success
    *   },
    *   function(error) {
@@ -108,7 +108,7 @@ var Anzu = (function () {
           pc.setRemoteDescription(new RTCSessionDescription(offer), function () {
             pc.createAnswer(function (answer) {
               _this.sdplog("Upstream answer", params.offer);
-              resolve({ pc: pc, answer: answer });
+              resolve({ pc: pc, answer: answer, offer: offer });
             }, function (error) {
               reject(error);
             });
@@ -133,8 +133,11 @@ var Anzu = (function () {
           return new Promise(function (resolve, reject) {
             var pc = params.pc;
             var answer = params.answer;
+            var offer = params.offer;
             pc.setLocalDescription(answer, function () {
               connection.answer(answer.sdp);
+              _this.upstreamPc = pc;
+              resolve(params.offer.clientId);
               pc.onicecandidate = function (event) {
                 if (event.candidate !== null) {
                   console.info("====== candidate ======");
@@ -145,10 +148,9 @@ var Anzu = (function () {
             }, function (error) {
               reject(error);
             });
-            _this.upstreamPc = pc;
           });
-        }).then(function () {
-          onSuccess();
+        }).then(function (clientId) {
+          onSuccess(clientId);
         }).catch(function (error) {
           onError(error);
         });
@@ -174,7 +176,7 @@ var Anzu = (function () {
      *   "channelId",
      *   "token",
      *   document.getElementById("remote-video"),
-     *   function() {
+     *   function(clientId) {
      *     // success
      *   },
      *   function(error) {
@@ -234,6 +236,8 @@ var Anzu = (function () {
             var clientId = params.offer.clientId;
             pc.setLocalDescription(answer, function () {
               connection.answer(answer.sdp);
+              _this2.downstreamPc[clientId] = pc;
+              resolve(clientId);
               pc.onicecandidate = function (event) {
                 if (event.candidate !== null) {
                   console.info("====== candidate ======");
@@ -242,10 +246,9 @@ var Anzu = (function () {
                 }
               };
             }, onError);
-            _this2.downstreamPc[clientId] = pc;
           });
-        }).then(function () {
-          onSuccess();
+        }).then(function (clientId) {
+          onSuccess(clientId);
         }).catch(function (error) {
           onError(error);
         });
