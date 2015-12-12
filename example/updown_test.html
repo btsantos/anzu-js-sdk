@@ -18,12 +18,6 @@
         <div class="col-xs-6">
           <h2>down</h2>
           <video id="remote-video1" autoplay="" style="width: 400px; height: 275px; border: 1px solid black;"></video>
-          <video id="remote-video2" autoplay="" style="width: 400px; height: 275px; border: 1px solid black;"></video>
-        </div>
-        <div class="col-xs-12">
-          <h2>connections</h2>
-          <ul id="connections">
-          </ul>
         </div>
       </div>
     </div>
@@ -31,31 +25,36 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="./anzu.js"></script>
     <script type="text/javascript">
-var anzu = new Anzu();
-var channelId = "PbwiQjTfq";
-var apiKey = "23440900-79f6-4964-930f-c96e33a2bce5";
-var upstreamToken = "ONR7EDGRnzydTv8CA";
-var datetime = "2015-12-04T12:18:37.174543";
-var signature = "f0464c6999b63476afb251d9a30555401b42649a5996d9d5a7e3ebbd7119c704";
+var anzuUrl = "http://localhost:8000/api/";
+var anzu = new Anzu({
+  anzuUrl: anzuUrl,
+  soraUrl: "ws://localhost:8000/signaling"
+});
+var channelId = "";
+var apiKey = "";
+var upstreamToken = "";
+var datetime = "";
+var signature = "";
 
 
 $("#start").on("click", function() {
   upstream();
-
   setTimeout(function() {
-    anzu.generateDownstreamToken(channelId, apiKey, datetime, signature)
-        .then(function(response) {
-          downstream(response.downstreamToken, document.getElementById("remote-video1"));
-        });
-    anzu.generateDownstreamToken(channelId, apiKey, datetime, signature)
-        .then(function(response) {
-          downstream(response.downstreamToken, document.getElementById("remote-video2"));
-        });
-  }, 2000)
-
-  setTimeout(function() {
-    listConnection();
-  }, 5000)
+    $.ajax({
+      type: "POST",
+      url: anzuUrl,
+      data: JSON.stringify({ channelId: channelId }),
+      dataType: "json",
+      headers: {
+        "x-anzu-target": "AnzuAPI_20151216.GenerateDownstreamToken",
+        "x-anzu-apikey": apiKey,
+        "x-anzu-date": datetime,
+        "x-anzu-signature": signature
+      }
+    }).done(function( msg ) {
+      downstream(msg.downstreamToken, document.getElementById("remote-video1"));
+    });
+  }, 5000);
 });
 
 function upstream() {
@@ -95,29 +94,6 @@ function downstream(downstreamToken, element) {
     }
   );
 }
-
-function listConnection() {
-  anzu.listConnection(channelId, apiKey, datetime, signature)
-    .then(function(response) {
-      $("#connections").html("");
-      $.each(response, function(_, connection) {
-        var li = $("<li>");
-        $.each(connection, function(key, value) {
-          li.append("<p>" + key + ": " + value + "</p>");
-        })
-        var button = $("<button>切断</button>");
-        button.on("click", function() {
-          anzu.disconnect(connection.channelId, connection.clientId, apiKey, datetime, signature)
-            .then(function(response) {
-              console.log("- disconnect -");
-            })
-        });
-        li.append(button);
-        $("#connections").append(li);
-      });
-    });
-}
-
     </script>
   </body>
 </html>
