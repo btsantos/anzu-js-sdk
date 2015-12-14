@@ -31,54 +31,51 @@ var Anzu = (function () {
    * @constructor
    */
 
-  function Anzu() {
-    var params = arguments.length <= 0 || arguments[0] === undefined ? { anzuUrl: null, soraUrl: null } : arguments[0];
+  function Anzu(role) {
+    var params = arguments.length <= 1 || arguments[1] === undefined ? { anzuUrl: null, soraUrl: null } : arguments[1];
 
     _classCallCheck(this, Anzu);
 
-    this.url = params.anzuUrl === null ? "https://anzu.shiguredo.jp/api/" : params.anzuUrl;
-    this.sora = new _soraJsSdk2.default(params.soraUrl === null ? "wss://anzu.shiguredo.jp/signaling" : params.soraUrl);
-    this.upstreamPc;
-    this.downstreamPc = {};
+    this.anzuUrl = params.anzuUrl === null ? "https://anzu.shiguredo.jp/api/" : params.anzuUrl;
+    this.soraUrl = params.soraUrl === null ? "wss://anzu.shiguredo.jp/signaling" : params.soraUrl;
+    if (role !== "upstream" && role !== "downstream") {
+      var error = new Error("Role " + role + " is not defined");
+      throw error;
+    }
+    this.role = role;
   }
-  /**
-   * アップストリームを開始する
-   * @param {string} channelId - チャンネルID
-   * @param {string} upstreamToken - アップストリームトークン
-   * @param {object} constraints - LocalMediaStream オブジェクトがサポートするメディアタイプ
-   * @param {object} videoElement - ストリームをプレイするビデオエレメント
-   * @param {onSuccessCallback} onSuccess - 接続成功時のコールバック
-   * @param {onErrorCallback} onError - エラー時のコールバック
-   * @param {onCloseCallback} onClose - 接続切断時のコールバック
-   * @example
-   * var anzu = new Anzu();
-   * anzu.startUpstream(
-   *   "channelId",
-   *   "token",
-   *   {video: true},
-   *   document.getElementById("local-video"),
-   *   function(clientId) {
-   *     // success
-   *   },
-   *   function(error) {
-   *     // error
-   *   },
-   *   function(error) {
-   *     // close
-   *   }
-   * )
-   */
 
   _createClass(Anzu, [{
-    key: "startUpstream",
-    value: function startUpstream(channelId, upstreamToken, constraints, videoElement, onSuccess, onError, onClose) {
+    key: "start",
+    value: function start(channelId, token) {
+      var constraints = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+
+      if (this.role === "upstream") {
+        var c = constraints === null ? { video: true, audio: true } : constraints;
+        return this._startUpstream(channelId, token, c);
+      } else if (this.role === "downstream") {
+        return this._startDownstream(channelId, token);
+      }
+    }
+    /**
+     * アップストリームを開始する
+     * @param {string} channelId - チャンネルID
+     * @param {string} upstreamToken - アップストリームトークン
+     * @param {object} constraints - LocalMediaStream オブジェクトがサポートするメディアタイプ
+     * )
+     */
+
+  }, {
+    key: "_startUpstream",
+    value: function _startUpstream(channelId, upstreamToken, constraints) {
       var _this = this;
 
-      var _getUserMedia = function _getUserMedia(constraints) {
+      var getUserMedia = function getUserMedia(constraints) {
         return new Promise(function (resolve, reject) {
           if (navigator.getUserMedia) {
             navigator.getUserMedia(constraints, function (stream) {
-              resolve(stream);
+              _this.stream = stream;
+              resolve({ stream: stream });
             }, function (err) {
               reject(err);
             });
@@ -87,24 +84,41 @@ var Anzu = (function () {
           }
         });
       };
-      var _createPeerConnection = function _createPeerConnection(params) {
-        _this.sdplog("Upstream Offer", params.offer);
-        var offer = params.offer;
-        var stream = params.stream;
-        return new Promise(function (resolve, reject) {
-          var pc = new RTCPeerConnection({ iceServers: offer.iceServers });
-          pc.addStream(stream);
-          resolve({ pc: pc, offer: offer });
+      var createOffer = function createOffer() {
+        _this.sora = new _soraJsSdk2.default(_this.soraUrl).connection();
+        return _this.sora.connect({
+          role: "upstream",
+          channelId: channelId,
+          accessToken: upstreamToken
         });
       };
-      var _createAnswer = function _createAnswer(params) {
-        var pc = params.pc;
-        var offer = params.offer;
+      var createPeerConnection = function createPeerConnection(offer) {
+        _this.sdplog("Upstream Offer", offer);
         return new Promise(function (resolve, reject) {
-          pc.setRemoteDescription(new RTCSessionDescription(offer), function () {
-            pc.createAnswer(function (answer) {
-              _this.sdplog("Upstream answer", params.offer);
-              resolve({ pc: pc, answer: answer, offer: offer });
+          _this.clientId = offer.clientId;
+          _this.pc = new RTCPeerConnection({ iceServers: offer.iceServers });
+          _this.pc.addStream(_this.stream);
+          resolve(offer);
+        });
+      };
+      var createAnswer = function createAnswer(offer) {
+        return new Promise(function (resolve, reject) {
+          _this.pc.setRemoteDescription(new RTCSessionDescription(offer), function () {
+            _this.pc.createAnswer(function (answer) {
+              _this.sdplog("Upstream answer", offer);
+              _this.pc.setLocalDescription(answer, function () {
+                _this.sora.answer(answer.sdp);
+                _this.pc.onicecandidate = function (event) {
+                  if (event.candidate !== null) {
+                    console.info("====== candidate ======");
+                    console.info(event.candidate);
+                    _this.sora.candidate(event.candidate);
+                  }
+                };
+                resolve({ clientId: _this.clientId, stream: _this.stream });
+              }, function (error) {
+                reject(error);
+              });
             }, function (error) {
               reject(error);
             });
@@ -113,146 +127,77 @@ var Anzu = (function () {
           });
         });
       };
-      var connection = this.sora.connection(function () {
-        _getUserMedia(constraints).then(function (stream) {
-          return new Promise(function (resolve, reject) {
-            videoElement.src = window.URL.createObjectURL(stream);
-            videoElement.play();
-            var params = { role: "upstream", channelId: channelId, accessToken: upstreamToken };
-            connection.connect(params, function (offer) {
-              resolve({ offer: offer, stream: stream });
-            }, function (error) {
-              reject(error);
-            });
-          });
-        }).then(_createPeerConnection).then(_createAnswer).then(function (params) {
-          return new Promise(function (resolve, reject) {
-            var pc = params.pc;
-            var answer = params.answer;
-            var offer = params.offer;
-            pc.setLocalDescription(answer, function () {
-              connection.answer(answer.sdp);
-              _this.upstreamPc = pc;
-              resolve(params.offer.clientId);
-              pc.onicecandidate = function (event) {
-                if (event.candidate !== null) {
-                  console.info("====== candidate ======");
-                  console.info(event.candidate);
-                  connection.candidate(event.candidate);
-                }
-              };
-            }, function (error) {
-              reject(error);
-            });
-          });
-        }).then(function (clientId) {
-          onSuccess(clientId);
-        }).catch(function (error) {
-          onError(error);
-        });
-      }, onError, function (e) {
-        videoElement.pause();
-        videoElement.src = "";
-        connection = null;
-        _this.upstreamPc = null;
-        onClose(e);
-      });
+      return getUserMedia(constraints).then(createOffer).then(createPeerConnection).then(createAnswer);
     }
     /**
      * ダウンストリームを開始する
      * @param {string} channelId - チャンネルID
      * @param {string} downstreamToken - ダウンストリームトークン
-     * @param {object} videoElement - ストリームをプレイするビデオエレメント
-     * @param {onSuccessCallback} onSuccess - 接続成功時のコールバック
-     * @param {onErrorCallback} onError - エラー時のコールバック
-     * @param {onCloseCallback} onClose - 接続切断時のコールバック
-     * @example
-     * var anzu = new Anzu();
-     * anzu.startDownstream(
-     *   "channelId",
-     *   "token",
-     *   document.getElementById("remote-video"),
-     *   function(clientId) {
-     *     // success
-     *   },
-     *   function(error) {
-     *     // error
-     *   },
-     *   function(error) {
-     *     // close
-     *   }
-     * )
      */
 
   }, {
-    key: "startDownstream",
-    value: function startDownstream(channelId, downstreamToken, videoElement, onSuccess, onError, onClose) {
+    key: "_startDownstream",
+    value: function _startDownstream(channelId, downstreamToken) {
       var _this2 = this;
 
-      var _createPeerConnection = function _createPeerConnection(params) {
-        _this2.sdplog("Downstream offer", params.offer);
-        return new Promise(function (resolve, reject) {
-          var offer = params.offer;
-          var pc = new RTCPeerConnection({ iceServers: offer.iceServers });
-          resolve({ pc: pc, offer: offer });
+      var createOffer = function createOffer() {
+        _this2.sora = new _soraJsSdk2.default(_this2.soraUrl).connection();
+        console.log("-- DOWNSTREAM OFFER --");
+        return _this2.sora.connect({
+          role: "downstream",
+          channelId: channelId,
+          accessToken: downstreamToken
         });
       };
-      var _createAnswer = function _createAnswer(params) {
-        var pc = params.pc;
-        var offer = params.offer;
+      var createPeerConnection = function createPeerConnection(offer) {
+        _this2.sdplog("Downstream offer", offer);
         return new Promise(function (resolve, reject) {
-          pc.setRemoteDescription(new RTCSessionDescription(offer), function () {
-            pc.createAnswer(function (answer) {
-              _this2.sdplog("Downstream answer", params.offer);
-              resolve({ pc: pc, offer: offer, answer: answer });
+          _this2.clientId = offer.clientId;
+          _this2.pc = new RTCPeerConnection({ iceServers: offer.iceServers });
+          resolve(offer);
+        });
+      };
+      var createAnswer = function createAnswer(offer) {
+        // firefox と chrome のタイミング問題判定用 flag
+        var is_ff = navigator.mozGetUserMedia !== undefined;
+        return new Promise(function (resolve, reject) {
+          if (!is_ff) {
+            _this2.pc.onaddstream = function (event) {
+              _this2.stream = event.stream;
+            };
+          }
+          _this2.pc.setRemoteDescription(new RTCSessionDescription(offer), function () {
+            _this2.pc.createAnswer(function (answer) {
+              _this2.sdplog("Downstream answer", offer);
+              _this2.pc.setLocalDescription(answer, function () {
+                _this2.sora.answer(answer.sdp);
+                _this2.sendanswer = true;
+                if (is_ff) {
+                  _this2.pc.onaddstream = function (event) {
+                    _this2.stream = event.stream;
+                    resolve({ clientId: _this2.clientId, stream: _this2.stream });
+                  };
+                } else {
+                  resolve({ clientId: _this2.clientId, stream: _this2.stream });
+                }
+                _this2.pc.onicecandidate = function (event) {
+                  if (event.candidate !== null) {
+                    console.info(event.candidate);
+                    _this2.sora.candidate(event.candidate);
+                  }
+                };
+              }, function (error) {
+                reject(error);
+              });
             }, function (error) {
               reject(error);
             });
           }, function (error) {
             reject(error);
           });
-          pc.onaddstream = function (event) {
-            videoElement.src = window.URL.createObjectURL(event.stream);
-            videoElement.play();
-          };
         });
       };
-      var connection = this.sora.connection(function () {
-        new Promise(function (resolve, reject) {
-          var params = { role: "downstream", channelId: channelId, accessToken: downstreamToken };
-          connection.connect(params, function (offer) {
-            resolve({ offer: offer });
-          }, function (error) {
-            reject(error);
-          });
-        }).then(_createPeerConnection).then(_createAnswer).then(function (params) {
-          return new Promise(function (resolve, reject) {
-            var pc = params.pc;
-            var answer = params.answer;
-            var clientId = params.offer.clientId;
-            pc.setLocalDescription(answer, function () {
-              connection.answer(answer.sdp);
-              _this2.downstreamPc[clientId] = pc;
-              resolve(clientId);
-              pc.onicecandidate = function (event) {
-                if (event.candidate !== null) {
-                  console.info("====== candidate ======");
-                  console.info(event.candidate);
-                  connection.candidate(event.candidate);
-                }
-              };
-            }, onError);
-          });
-        }).then(function (clientId) {
-          onSuccess(clientId);
-        }).catch(function (error) {
-          onError(error);
-        });
-      }, onError, function (e) {
-        videoElement.pause();
-        videoElement.src = "";
-        onClose(e);
-      });
+      return createOffer().then(createPeerConnection).then(createAnswer);
     }
   }, {
     key: "sdplog",
@@ -296,11 +241,8 @@ var Sora = (function () {
 
   _createClass(Sora, [{
     key: "connection",
-    value: function connection(onSuccess) {
-      var onError = arguments.length <= 1 || arguments[1] === undefined ? function () {} : arguments[1];
-      var onClose = arguments.length <= 2 || arguments[2] === undefined ? function () {} : arguments[2];
-
-      return new SoraConnection(this.url, onSuccess, onError, onClose);
+    value: function connection() {
+      return new SoraConnection(this.url);
     }
   }]);
 
@@ -308,51 +250,45 @@ var Sora = (function () {
 })();
 
 var SoraConnection = (function () {
-  function SoraConnection(url, onSuccess, onError, onClose) {
+  function SoraConnection(url) {
     _classCallCheck(this, SoraConnection);
 
-    this._ws = new WebSocket(url);
-    this._onClose = onClose;
-    this._ws.onopen = function () {
-      onSuccess();
-    };
-    this._ws.onerror = function (e) {
-      onError(e);
-    };
-    this._ws.onclose = function (e) {
-      onClose(e);
-    };
+    this._ws = null;
+    this._url = url;
   }
 
   _createClass(SoraConnection, [{
     key: "connect",
-    value: function connect(params, onOffer, onError) {
+    value: function connect(params) {
       var _this = this;
 
-      var self = this;
-      this._ws.onclose = function (e) {
-        if (e.code === 4401) {
-          onError(e);
-        } else {
-          _this._onClose(e);
+      return new Promise(function (resolve, reject) {
+        if (_this._ws === null) {
+          _this._ws = new WebSocket(_this._url);
         }
-        self._ws = null;
-      };
-      this._ws.onmessage = function (event) {
-        var data = JSON.parse(event.data);
-        if (data.type == "offer") {
-          onOffer(data);
-        } else if (data.type == "ping") {
-          self._ws.send(JSON.stringify({ type: "pong" }));
-        }
-      };
-      var message = JSON.stringify({
-        type: "connect",
-        role: params.role,
-        channelId: params.channelId,
-        accessToken: params.accessToken
+        _this._ws.onopen = function () {
+          var message = JSON.stringify({
+            type: "connect",
+            role: params.role,
+            channelId: params.channelId,
+            accessToken: params.accessToken
+          });
+          _this._ws.send(message);
+        };
+        _this._ws.onclose = function (e) {
+          if (e.code === 4401) {
+            reject(e);
+          }
+        };
+        _this._ws.onmessage = function (event) {
+          var data = JSON.parse(event.data);
+          if (data.type == "offer") {
+            resolve(data);
+          } else if (data.type == "ping") {
+            _this._ws.send(JSON.stringify({ type: "pong" }));
+          }
+        };
       });
-      this._ws.send(message);
     }
   }, {
     key: "answer",
