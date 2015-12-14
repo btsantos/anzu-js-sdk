@@ -1,0 +1,99 @@
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title>updown test</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  </head>
+  <body>
+    <div class="container">
+      <h1>updown test</h1>
+      <div class="row">
+        <div class="col-xs-12">
+          <button id="start" type="button">start video</button>
+        </div>
+        <div class="col-xs-6">
+          <h2>up</h2>
+          <video id="local-video" autoplay="" style="width: 400px; height: 275px; border: 1px solid black;"></video>
+        </div>
+        <div class="col-xs-6">
+          <h2>down</h2>
+          <video id="remote-video1" autoplay="" style="width: 400px; height: 275px; border: 1px solid black;"></video>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="./anzu.js"></script>
+    <script type="text/javascript">
+var anzuUrl = "http://localhost:8000/api/";
+var anzu = new Anzu({
+  anzuUrl: anzuUrl,
+  soraUrl: "ws://localhost:8000/signaling"
+});
+var channelId = "";
+var apiKey = "";
+var upstreamToken = "";
+var datetime = "";
+var signature = "";
+
+
+$("#start").on("click", function() {
+  upstream();
+  setTimeout(function() {
+    $.ajax({
+      type: "POST",
+      url: anzuUrl,
+      data: JSON.stringify({ channelId: channelId }),
+      dataType: "json",
+      headers: {
+        "x-anzu-target": "AnzuAPI_20151216.GenerateDownstreamToken",
+        "x-anzu-apikey": apiKey,
+        "x-anzu-date": datetime,
+        "x-anzu-signature": signature
+      }
+    }).done(function( msg ) {
+      downstream(msg.downstreamToken, document.getElementById("remote-video1"));
+    });
+  }, 5000);
+});
+
+function upstream() {
+  console.log("= upstream =");
+  anzu.startUpstream(
+    channelId,
+    upstreamToken,
+    {video: true},
+    document.getElementById("local-video"),
+    function() {
+      console.log("- success -");
+    },
+    function(e) {
+      console.log(e);
+      console.log("- error -");
+    },
+    function(e) {
+      console.log("- close -");
+    }
+  );
+}
+
+function downstream(downstreamToken, element) {
+  console.log("= downstream =");
+  anzu.startDownstream(
+    channelId,
+    downstreamToken,
+    element,
+    function() {
+      console.log("- success -");
+    },
+    function(e) {
+      console.log("- error -");
+    },
+    function(e) {
+      console.log("- close -");
+    }
+  );
+}
+    </script>
+  </body>
+</html>
