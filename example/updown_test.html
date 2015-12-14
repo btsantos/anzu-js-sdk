@@ -8,16 +8,13 @@
     <div class="container">
       <h1>updown test</h1>
       <div class="row">
-        <div class="col-xs-12">
-          <button id="start" type="button">start video</button>
-        </div>
         <div class="col-xs-6">
           <h2>up</h2>
           <video id="local-video" autoplay="" style="width: 400px; height: 275px; border: 1px solid black;"></video>
         </div>
         <div class="col-xs-6">
           <h2>down</h2>
-          <video id="remote-video1" autoplay="" style="width: 400px; height: 275px; border: 1px solid black;"></video>
+          <video id="remote-video" autoplay="" style="width: 400px; height: 275px; border: 1px solid black;"></video>
         </div>
       </div>
     </div>
@@ -25,75 +22,61 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="./anzu.js"></script>
     <script type="text/javascript">
-var anzuUrl = "http://localhost:8000/api/";
-var anzu = new Anzu({
-  anzuUrl: anzuUrl,
-  soraUrl: "ws://localhost:8000/signaling"
-});
-var channelId = "";
-var apiKey = "";
-var upstreamToken = "";
-var datetime = "";
-var signature = "";
+      var channelId = "gLCmwNdqj";
+      var upstreamToken = "WTJxVt4OXqrbEjqjn";
+      var anzuUrl = "http://localhost:8000/api/";
+      var apiKey = "dd8cad42-168c-4865-815a-b9cc1642ac93";
+      var datetime = "2015-12-14T10:32:24.718562+00:00";
+      var signature = "c03b1f9f8d4b99b8e6117c4b30760e11be346617b5540798b22da18753bfc99a";
+
+      // Upstream を開始する
+      var anzuUpstream = new Anzu("upstream", {
+        anzuUrl: anzuUrl,
+        soraUrl: "ws://localhost:8000/signaling"
+      });
+      anzuUpstream.start(channelId, upstreamToken, {video: true, audio: false})
+        .then(function(params) {
+          var videoElement = document.getElementById("local-video");
+          videoElement.src = window.URL.createObjectURL(params.stream);
+          videoElement.play();
+          console.log(params.clientId);
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
 
 
-$("#start").on("click", function() {
-  upstream();
-  setTimeout(function() {
-    $.ajax({
-      type: "POST",
-      url: anzuUrl,
-      data: JSON.stringify({ channelId: channelId }),
-      dataType: "json",
-      headers: {
-        "x-anzu-target": "AnzuAPI_20151216.GenerateDownstreamToken",
-        "x-anzu-apikey": apiKey,
-        "x-anzu-date": datetime,
-        "x-anzu-signature": signature
-      }
-    }).done(function( msg ) {
-      downstream(msg.downstreamToken, document.getElementById("remote-video1"));
-    });
-  }, 5000);
-});
-
-function upstream() {
-  console.log("= upstream =");
-  anzu.startUpstream(
-    channelId,
-    upstreamToken,
-    {video: true},
-    document.getElementById("local-video"),
-    function() {
-      console.log("- success -");
-    },
-    function(e) {
-      console.log(e);
-      console.log("- error -");
-    },
-    function(e) {
-      console.log("- close -");
-    }
-  );
-}
-
-function downstream(downstreamToken, element) {
-  console.log("= downstream =");
-  anzu.startDownstream(
-    channelId,
-    downstreamToken,
-    element,
-    function() {
-      console.log("- success -");
-    },
-    function(e) {
-      console.log("- error -");
-    },
-    function(e) {
-      console.log("- close -");
-    }
-  );
-}
+      setTimeout(function() {
+        // DownstreamToken を生成する
+        $.ajax({
+          type: "POST",
+          url: anzuUrl,
+          data: JSON.stringify({ channelId: channelId }),
+          dataType: "json",
+          headers: {
+            "x-anzu-target": "AnzuAPI_20151216.GenerateDownstreamToken",
+            "x-anzu-apikey": apiKey,
+            "x-anzu-date": datetime,
+            "x-anzu-signature": signature
+          }
+        }).done(function(msg) {
+          // Downstream を開始する
+          var anzuDownstream = new Anzu("downstream", {
+            anzuUrl: anzuUrl,
+            soraUrl: "ws://localhost:8000/signaling"
+          });
+          anzuDownstream.start(channelId, msg.downstreamToken)
+            .then(function(params) {
+              var videoElement = document.getElementById("remote-video");
+              videoElement.src = window.URL.createObjectURL(params.stream);
+              videoElement.play();
+              console.log(params.clientId);
+            })
+            .catch(function(error) {
+              console.log(error);
+            });
+        });
+      }, 5000);
     </script>
   </body>
 </html>
