@@ -7,12 +7,11 @@ navigator.getUserMedia = navigator.getUserMedia ||
                          navigator.mozGetUserMedia ||
                          navigator.msGetUserMedia;
 
-/**
-@class Anzu
-*/
 class Anzu {
   /**
    * @constructor
+   * @param {string} rolse - ロール (upstram or downstream)
+   * @param {?object} [params={anzuUrl: null, soraUrl: null}] - URL 設定
    */
   constructor(role, params={anzuUrl: null, soraUrl: null}) {
     this.anzuUrl = params.anzuUrl === null ? "https://anzu.shiguredo.jp/api/" : params.anzuUrl;
@@ -23,6 +22,12 @@ class Anzu {
     }
     this.role = role;
   }
+  /**
+   * Anzu を開始する
+   * @param {string} channelId - チャンネルID
+   * @param {string} token - アクセストークン
+   * @param {object} [constraints={video: true, audio: true}] - LocalMediaStream オブジェクトがサポートするメディアタイプ
+   */
   start(channelId, token, constraints=null) {
     if (this.role === "upstream") {
       let c = constraints === null ? { video: true, audio: true } : constraints;
@@ -34,6 +39,7 @@ class Anzu {
   }
   /**
    * アップストリームを開始する
+   * @private
    * @param {string} channelId - チャンネルID
    * @param {string} upstreamToken - アップストリームトークン
    * @param {object} constraints - LocalMediaStream オブジェクトがサポートするメディアタイプ
@@ -96,6 +102,7 @@ class Anzu {
   }
   /**
    * ダウンストリームを開始する
+   * @private
    * @param {string} channelId - チャンネルID
    * @param {string} downstreamToken - ダウンストリームトークン
    */
