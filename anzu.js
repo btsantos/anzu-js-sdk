@@ -13,7 +13,7 @@ class Anzu {
    * @param {string} rolse - ロール (upstram or downstream)
    * @param {?object} [params={anzuUrl: null, soraUrl: null}] - URL 設定
    */
-  constructor(role, params={anzuUrl: null, soraUrl: null}) {
+  constructor(role, params={ anzuUrl: null, soraUrl: null }) {
     this.anzuUrl = params.anzuUrl === null ? "https://anzu.shiguredo.jp/api/" : params.anzuUrl;
     this.soraUrl = params.soraUrl === null ? "wss://anzu.shiguredo.jp/signaling" : params.soraUrl;
     if (role !== "upstream" && role !== "downstream") {
@@ -51,10 +51,10 @@ class Anzu {
         if (navigator.getUserMedia) {
           navigator.getUserMedia(constraints, (stream) => {
             this.stream = stream;
-            resolve({stream: stream});
+            resolve({ stream: stream });
           }, (err) => { reject(err); });
         } else {
-          reject(message);
+          reject();
         }
       });
     };
@@ -68,9 +68,9 @@ class Anzu {
     };
     let createPeerConnection = (offer) => {
       this.sdplog("Upstream Offer", offer);
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve, _reject) => {
         this.clientId = offer.clientId;
-        this.pc = new RTCPeerConnection({iceServers: offer.iceServers});
+        this.pc = new RTCPeerConnection({ iceServers: offer.iceServers });
         this.pc.addStream(this.stream);
         resolve(offer);
       });
@@ -84,12 +84,12 @@ class Anzu {
               this.sora.answer(answer.sdp);
               this.pc.onicecandidate = (event) => {
                 if (event.candidate !== null) {
-                  console.info("====== candidate ======");
-                  console.info(event.candidate);
+                  console.info("====== candidate ======"); // eslint-disable-line
+                  console.info(event.candidate); // eslint-disable-line
                   this.sora.candidate(event.candidate);
                 }
               };
-              resolve({clientId: this.clientId, stream: this.stream});
+              resolve({ clientId: this.clientId, stream: this.stream });
             }, (error) => { reject(error); });
           }, (error) => { reject(error); });
         }, (error) => { reject(error); });
@@ -109,7 +109,6 @@ class Anzu {
   _startDownstream(channelId, downstreamToken) {
     let createOffer = () => {
       this.sora = new Sora(this.soraUrl).connection();
-      console.log("-- DOWNSTREAM OFFER --");
       return this.sora.connect({
         role: "downstream",
         channelId: channelId,
@@ -118,9 +117,9 @@ class Anzu {
     };
     let createPeerConnection = (offer) => {
       this.sdplog("Downstream offer", offer);
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve, _reject) => {
         this.clientId = offer.clientId;
-        this.pc = new RTCPeerConnection({iceServers: offer.iceServers});
+        this.pc = new RTCPeerConnection({ iceServers: offer.iceServers });
         resolve(offer);
       });
     };
@@ -142,15 +141,16 @@ class Anzu {
               if (is_ff) {
                 this.pc.onaddstream = (event) => {
                   this.stream = event.stream;
-                  resolve({clientId: this.clientId, stream: this.stream});
+                  resolve({ clientId: this.clientId, stream: this.stream });
                 };
               }
               else {
-                resolve({clientId: this.clientId, stream: this.stream});
+                resolve({ clientId: this.clientId, stream: this.stream });
               }
               this.pc.onicecandidate = (event) => {
                 if (event.candidate !== null) {
-                  console.info(event.candidate);
+                  console.info("====== candidate ======"); // eslint-disable-line
+                  console.info(event.candidate); // eslint-disable-line
                   this.sora.candidate(event.candidate);
                 }
               };
@@ -164,10 +164,10 @@ class Anzu {
       .then(createAnswer);
   }
   sdplog(title, target) {
-    console.info("========== " + title + " ==========");
+    console.info("========== " + title + " =========="); // eslint-disable-line
     for (let i in target) {
-      console.info(i + ":");
-      console.info(target[i]);
+      console.info(i + ":"); // eslint-disable-line
+      console.info(target[i]); // eslint-disable-line
     }
   }
 }
