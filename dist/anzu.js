@@ -22,13 +22,11 @@ var RTCPeerConnection = window.mozRTCPeerConnection || window.webkitRTCPeerConne
 var RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription;
 navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
-/**
-@class Anzu
-*/
-
 var Anzu = (function () {
   /**
    * @constructor
+   * @param {string} rolse - ロール (upstram or downstream)
+   * @param {?object} [params={anzuUrl: null, soraUrl: null}] - URL 設定
    */
 
   function Anzu(role) {
@@ -44,6 +42,12 @@ var Anzu = (function () {
     }
     this.role = role;
   }
+  /**
+   * Anzu を開始する
+   * @param {string} channelId - チャンネルID
+   * @param {string} token - アクセストークン
+   * @param {object} [constraints={video: true, audio: true}] - LocalMediaStream オブジェクトがサポートするメディアタイプ
+   */
 
   _createClass(Anzu, [{
     key: "start",
@@ -59,6 +63,7 @@ var Anzu = (function () {
     }
     /**
      * アップストリームを開始する
+     * @private
      * @param {string} channelId - チャンネルID
      * @param {string} upstreamToken - アップストリームトークン
      * @param {object} constraints - LocalMediaStream オブジェクトがサポートするメディアタイプ
@@ -131,6 +136,7 @@ var Anzu = (function () {
     }
     /**
      * ダウンストリームを開始する
+     * @private
      * @param {string} channelId - チャンネルID
      * @param {string} downstreamToken - ダウンストリームトークン
      */
