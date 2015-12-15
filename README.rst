@@ -65,7 +65,9 @@ anzuDownstream.start(channelId, downstreamToken) の引数に渡してくださ�
 
 ::
 
-  anzuDownstream.start(channelId, "")
+  var downstreamToken = "";
+
+  anzuDownstream.start(channelId, downstreamToken)
     .then(function(params) {
       var videoElement = document.getElementById("remote-video");
       videoElement.src = window.URL.createObjectURL(params.stream);
