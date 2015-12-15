@@ -22,18 +22,24 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="./anzu.js"></script>
     <script type="text/javascript">
-      var channelId = "gLCmwNdqj";
-      var upstreamToken = "WTJxVt4OXqrbEjqjn";
       var anzuUrl = "http://localhost:8000/api/";
-      var apiKey = "dd8cad42-168c-4865-815a-b9cc1642ac93";
-      var datetime = "2015-12-14T10:32:24.718562+00:00";
-      var signature = "c03b1f9f8d4b99b8e6117c4b30760e11be346617b5540798b22da18753bfc99a";
+      var soraUrl = "ws://localhost:8000/signaling";
 
-      // Upstream を開始する
+      var channelId = "A0ngRp8Iv";
+      var upstreamToken = "5h0VEx0mN7FLTUMNa";
+      var apiKey = "b845a823-69f6-43e3-8917-4ae52eab006a";
+      var datetime = "2015-12-15T01:00:39.664192+00:00";
+      var signature = "3affc3df39aea59cdf0b42453625f940552c179040fd70f947a447f1ad390c76";
+
       var anzuUpstream = new Anzu("upstream", {
         anzuUrl: anzuUrl,
-        soraUrl: "ws://localhost:8000/signaling"
+        soraUrl: soraUrl
       });
+      var anzuDownstream = new Anzu("downstream", {
+        anzuUrl: anzuUrl,
+        soraUrl: soraUrl
+      });
+      // Upstream を開始する
       anzuUpstream.start(channelId, upstreamToken, {video: true, audio: false})
         .then(function(params) {
           var videoElement = document.getElementById("local-video");
@@ -61,10 +67,6 @@
           }
         }).done(function(msg) {
           // Downstream を開始する
-          var anzuDownstream = new Anzu("downstream", {
-            anzuUrl: anzuUrl,
-            soraUrl: "ws://localhost:8000/signaling"
-          });
           anzuDownstream.start(channelId, msg.downstreamToken)
             .then(function(params) {
               var videoElement = document.getElementById("remote-video");
