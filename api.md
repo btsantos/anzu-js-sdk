@@ -14,7 +14,7 @@
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | rolse | <code>string</code> |  | ロール (upstram or downstream) |
-| [params] | <code>object</code> | <code>{anzuUrl: null, soraUrl: null}</code> | URL 設定 |
+| [params] | <code>object</code> | <code>{anzuUrl: null, signalingUrl: null}</code> | URL 設定 |
 
 <a name="Anzu+start"></a>
 ### anzu.start(channelId, token, [constraints])

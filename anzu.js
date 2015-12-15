@@ -11,11 +11,11 @@ class Anzu {
   /**
    * @constructor
    * @param {string} rolse - ロール (upstram or downstream)
-   * @param {?object} [params={anzuUrl: null, soraUrl: null}] - URL 設定
+   * @param {?object} [params={anzuUrl: null, signalingUrl: null}] - URL 設定
    */
-  constructor(role, params={ anzuUrl: null, soraUrl: null }) {
+  constructor(role, params={ anzuUrl: null, signalingUrl: null }) {
     this.anzuUrl = params.anzuUrl === null ? "https://anzu.shiguredo.jp/api/" : params.anzuUrl;
-    this.soraUrl = params.soraUrl === null ? "wss://anzu.shiguredo.jp/signaling" : params.soraUrl;
+    this.signalingUrl = params.signalingUrl === null ? "wss://anzu.shiguredo.jp/signaling" : params.signalingUrl;
     if (role !== "upstream" && role !== "downstream") {
       let error = new Error("Role " + role + " is not defined");
       throw error;
@@ -59,7 +59,7 @@ class Anzu {
       });
     };
     let createOffer = () => {
-      this.sora = new Sora(this.soraUrl).connection();
+      this.sora = new Sora(this.signalingUrl).connection();
       return this.sora.connect({
         role: "upstream",
         channelId: channelId,
@@ -108,7 +108,7 @@ class Anzu {
    */
   _startDownstream(channelId, downstreamToken) {
     let createOffer = () => {
-      this.sora = new Sora(this.soraUrl).connection();
+      this.sora = new Sora(this.signalingUrl).connection();
       return this.sora.connect({
         role: "downstream",
         channelId: channelId,

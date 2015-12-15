@@ -1,7 +1,7 @@
 /**
  * anzu-js-sdk
  * anzu-js-sdk
- * @version 0.2.0
+ * @version 0.3.0
  * @author Shiguredo Inc.
  * @license MIT
  */
@@ -26,16 +26,16 @@ var Anzu = (function () {
   /**
    * @constructor
    * @param {string} rolse - ロール (upstram or downstream)
-   * @param {?object} [params={anzuUrl: null, soraUrl: null}] - URL 設定
+   * @param {?object} [params={anzuUrl: null, signalingUrl: null}] - URL 設定
    */
 
   function Anzu(role) {
-    var params = arguments.length <= 1 || arguments[1] === undefined ? { anzuUrl: null, soraUrl: null } : arguments[1];
+    var params = arguments.length <= 1 || arguments[1] === undefined ? { anzuUrl: null, signalingUrl: null } : arguments[1];
 
     _classCallCheck(this, Anzu);
 
     this.anzuUrl = params.anzuUrl === null ? "https://anzu.shiguredo.jp/api/" : params.anzuUrl;
-    this.soraUrl = params.soraUrl === null ? "wss://anzu.shiguredo.jp/signaling" : params.soraUrl;
+    this.signalingUrl = params.signalingUrl === null ? "wss://anzu.shiguredo.jp/signaling" : params.signalingUrl;
     if (role !== "upstream" && role !== "downstream") {
       var error = new Error("Role " + role + " is not defined");
       throw error;
@@ -90,7 +90,7 @@ var Anzu = (function () {
         });
       };
       var createOffer = function createOffer() {
-        _this.sora = new _soraJsSdk2.default(_this.soraUrl).connection();
+        _this.sora = new _soraJsSdk2.default(_this.signalingUrl).connection();
         return _this.sora.connect({
           role: "upstream",
           channelId: channelId,
@@ -147,7 +147,7 @@ var Anzu = (function () {
       var _this2 = this;
 
       var createOffer = function createOffer() {
-        _this2.sora = new _soraJsSdk2.default(_this2.soraUrl).connection();
+        _this2.sora = new _soraJsSdk2.default(_this2.signalingUrl).connection();
         return _this2.sora.connect({
           role: "downstream",
           channelId: channelId,
@@ -227,7 +227,7 @@ module.exports = Anzu;
 /*!
  * sora-js-sdk
  * WebRTC SFU Sora Signaling Library
- * @version 0.1.0
+ * @version 0.2.0
  * @author Shiguredo Inc.
  * @license MIT
  */
