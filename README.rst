@@ -2,12 +2,13 @@
 Anzu JavaScript SDK
 ###################
 
-Anzu をブラウザから簡単に使うための仕組みです。
+`WebRTC SFU as a Service Anzu <https://anzu.shiguredo.jp>`_ をブラウザから扱うための SDK です。
+
 
 サンプル
 ========
 
-:URL:
+:URL: https://github.com/shiguredo/anzu-js-sdk/blob/master/example/updown_test.html
 
 **視聴者の制限をなしで試してください**
 
@@ -22,7 +23,7 @@ examples/updown_test.html の channelId と upstreamToken を指定します。
     var channelId = "";
     var upstreamToken = "";
 
-    // Upstream を開始する
+    // 配信を開始する
     var anzuUpstream = new Anzu("upstream");
     anzuUpstream.start(channelId, upstreamToken, {video: true, audio: true})
       .then(function(params) {
@@ -34,7 +35,7 @@ examples/updown_test.html の channelId と upstreamToken を指定します。
         console.error(error);
       });
 
-    // Downstream を開始する
+    // 視聴を開始する
     var anzuDownstream = new Anzu("downstream");
     anzuDownstream.start(channelId, "")
       .then(function(params) {
@@ -46,6 +47,7 @@ examples/updown_test.html の channelId と upstreamToken を指定します。
         console.error(error);
       });
 
+`anzu.js <https://github.com/shiguredo/anzu-js-sdk/blob/develop/dist/anzu.js>`_ を使うことでこれくらいの行数で配信や受信を実現できるようになります。
 
 注意
 ----
