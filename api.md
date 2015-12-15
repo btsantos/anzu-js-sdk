@@ -1,12 +1,5 @@
 ## Classes
 
-<dl>
-<dt><a href="#Anzu">Anzu</a></dt>
-<dd></dd>
-<dt><a href="#Anzu">Anzu</a></dt>
-<dd></dd>
-</dl>
-
 <a name="Anzu"></a>
 ## Anzu
 **Kind**: global class  
