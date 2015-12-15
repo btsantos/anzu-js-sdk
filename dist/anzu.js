@@ -85,7 +85,7 @@ var Anzu = (function () {
               reject(err);
             });
           } else {
-            reject(message);
+            reject();
           }
         });
       };
@@ -99,7 +99,7 @@ var Anzu = (function () {
       };
       var createPeerConnection = function createPeerConnection(offer) {
         _this.sdplog("Upstream Offer", offer);
-        return new Promise(function (resolve, reject) {
+        return new Promise(function (resolve, _reject) {
           _this.clientId = offer.clientId;
           _this.pc = new RTCPeerConnection({ iceServers: offer.iceServers });
           _this.pc.addStream(_this.stream);
@@ -115,8 +115,8 @@ var Anzu = (function () {
                 _this.sora.answer(answer.sdp);
                 _this.pc.onicecandidate = function (event) {
                   if (event.candidate !== null) {
-                    console.info("====== candidate ======");
-                    console.info(event.candidate);
+                    console.info("====== candidate ======"); // eslint-disable-line
+                    console.info(event.candidate); // eslint-disable-line
                     _this.sora.candidate(event.candidate);
                   }
                 };
@@ -148,7 +148,6 @@ var Anzu = (function () {
 
       var createOffer = function createOffer() {
         _this2.sora = new _soraJsSdk2.default(_this2.soraUrl).connection();
-        console.log("-- DOWNSTREAM OFFER --");
         return _this2.sora.connect({
           role: "downstream",
           channelId: channelId,
@@ -157,7 +156,7 @@ var Anzu = (function () {
       };
       var createPeerConnection = function createPeerConnection(offer) {
         _this2.sdplog("Downstream offer", offer);
-        return new Promise(function (resolve, reject) {
+        return new Promise(function (resolve, _reject) {
           _this2.clientId = offer.clientId;
           _this2.pc = new RTCPeerConnection({ iceServers: offer.iceServers });
           resolve(offer);
@@ -188,7 +187,8 @@ var Anzu = (function () {
                 }
                 _this2.pc.onicecandidate = function (event) {
                   if (event.candidate !== null) {
-                    console.info(event.candidate);
+                    console.info("====== candidate ======"); // eslint-disable-line
+                    console.info(event.candidate); // eslint-disable-line
                     _this2.sora.candidate(event.candidate);
                   }
                 };
@@ -208,10 +208,10 @@ var Anzu = (function () {
   }, {
     key: "sdplog",
     value: function sdplog(title, target) {
-      console.info("========== " + title + " ==========");
+      console.info("========== " + title + " =========="); // eslint-disable-line
       for (var i in target) {
-        console.info(i + ":");
-        console.info(target[i]);
+        console.info(i + ":"); // eslint-disable-line
+        console.info(target[i]); // eslint-disable-line
       }
     }
   }]);
