@@ -39,17 +39,15 @@
 
       // Downstream を開始する
       var anzuDownstream = new Anzu("downstream");
-      setTimeout(function() {
-        anzuDownstream.start(channelId, "")
-          .then(function(params) {
-            var videoElement = document.getElementById("remote-video");
-            videoElement.src = window.URL.createObjectURL(params.stream);
-            videoElement.play();
-          })
-          .catch(function(error) {
-            console.error(error);
-          });
-      }, 5000);
+      anzuDownstream.start(channelId, "")
+        .then(function(params) {
+          var videoElement = document.getElementById("remote-video");
+          videoElement.src = window.URL.createObjectURL(params.stream);
+          videoElement.play();
+        })
+        .catch(function(error) {
+          console.error(error);
+        });
     </script>
   </body>
 </html>
