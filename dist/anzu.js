@@ -1,7 +1,7 @@
 /**
  * anzu-js-sdk
  * anzu-js-sdk
- * @version 0.2.0
+ * @version 0.3.0
  * @author Shiguredo Inc.
  * @license MIT
  */
@@ -227,7 +227,7 @@ module.exports = Anzu;
 /*!
  * sora-js-sdk
  * WebRTC SFU Sora Signaling Library
- * @version 0.1.0
+ * @version 0.2.0
  * @author Shiguredo Inc.
  * @license MIT
  */
