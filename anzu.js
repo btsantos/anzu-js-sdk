@@ -163,6 +163,12 @@ class Anzu {
       .then(createPeerConnection)
       .then(createAnswer);
   }
+  /**
+   * コンソールログを出力する
+   * @private
+   * @param {string} title - タイトル
+   * @param {string} target - ターゲット
+   */
   sdplog(title, target) {
     console.info("========== " + title + " =========="); // eslint-disable-line
     for (let i in target) {
