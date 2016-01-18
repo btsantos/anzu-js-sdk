@@ -21,6 +21,8 @@ class Anzu {
       throw error;
     }
     this.role = role;
+    this._onError = function() {};
+    this._onDisconnect = function() {};
   }
   /**
    * Anzu を開始する
@@ -60,6 +62,8 @@ class Anzu {
     };
     let createOffer = () => {
       this.sora = new Sora(this.signalingUrl).connection();
+      this.sora.onError(this._onerror);
+      this.sora.onDisconnect(this._onDisconnect);
       return this.sora.connect({
         role: "upstream",
         channelId: channelId,
@@ -109,6 +113,8 @@ class Anzu {
   _startDownstream(channelId, downstreamToken) {
     let createOffer = () => {
       this.sora = new Sora(this.signalingUrl).connection();
+      this.sora.onError(this._onerror);
+      this.sora.onDisconnect(this._onDisconnect);
       return this.sora.connect({
         role: "downstream",
         channelId: channelId,
@@ -174,6 +180,34 @@ class Anzu {
     for (let i in target) {
       console.info(i + ":"); // eslint-disable-line
       console.info(target[i]); // eslint-disable-line
+    }
+  }
+  /**
+   * 切断する
+   */
+  disconnect() {
+    if (this.sora) {
+      this.sora.disconnect();
+    }
+  }
+  /**
+   * エラー時のコールバックを登録する
+   * @param {function} コールバック
+   */
+  onError(f) {
+    this._onError = f;
+    if (this.sora) {
+      this.sora.onError(f);
+    }
+  }
+  /**
+   * 切断時のコールバックを登録する
+   * @param {function} コールバック
+   */
+  onDisconnect(f) {
+    this._onDisconnect = f;
+    if (this.sora) {
+      this.sora.onDisconnect(f);
     }
   }
 }
