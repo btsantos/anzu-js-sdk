@@ -2,8 +2,12 @@
 Anzu JavaScript SDK
 ###################
 
+:バージョン: 0.3.0
+
 `WebRTC SFU as a Service Anzu <https://anzu.shiguredo.jp>`_ をブラウザから扱うための SDK です。
 
+:anzu.js: https://github.com/shiguredo/anzu-js-sdk/blob/master/dist/anzu.js
+:anzu.min.js: https://github.com/shiguredo/anzu-js-sdk/blob/master/dist/anzu.min.js
 
 サンプル
 ========
@@ -16,7 +20,7 @@ Anzu JavaScript SDK
 
 examples/updown_test.html の channelId と upstreamToken を指定します。
 
-あとは、配信がを確認してください
+あとは、実際に動作させてみて動かしてみてください。
 
 ::
 

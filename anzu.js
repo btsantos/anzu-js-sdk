@@ -21,6 +21,8 @@ class Anzu {
       throw error;
     }
     this.role = role;
+    this._onError = function() {};
+    this._onDisconnect = function() {};
   }
   /**
    * Anzu を開始する
@@ -60,6 +62,8 @@ class Anzu {
     };
     let createOffer = () => {
       this.sora = new Sora(this.signalingUrl).connection();
+      this.sora.onError(this._onerror);
+      this.sora.onDisconnect(this._onDisconnect);
       return this.sora.connect({
         role: "upstream",
         channelId: channelId,
@@ -81,15 +85,24 @@ class Anzu {
           this.pc.createAnswer((answer) => {
             this.sdplog("Upstream answer", offer);
             this.pc.setLocalDescription(answer, () => {
+              this.icecandidateCompleted = false;
               this.sora.answer(answer.sdp);
+              setTimeout(() => {
+                if (!this.icecandidateCompleted) {
+                  reject("ICE failed");
+                }
+              }, 5000);
               this.pc.onicecandidate = (event) => {
-                if (event.candidate !== null) {
+                if (event.candidate === null) {
+                  this.icecandidateCompleted = true;
+                  resolve({ clientId: this.clientId, stream: this.stream });
+                }
+                else {
                   console.info("====== candidate ======"); // eslint-disable-line
                   console.info(event.candidate); // eslint-disable-line
                   this.sora.candidate(event.candidate);
                 }
               };
-              resolve({ clientId: this.clientId, stream: this.stream });
             }, (error) => { reject(error); });
           }, (error) => { reject(error); });
         }, (error) => { reject(error); });
@@ -109,6 +122,8 @@ class Anzu {
   _startDownstream(channelId, downstreamToken) {
     let createOffer = () => {
       this.sora = new Sora(this.signalingUrl).connection();
+      this.sora.onError(this._onerror);
+      this.sora.onDisconnect(this._onDisconnect);
       return this.sora.connect({
         role: "downstream",
         channelId: channelId,
@@ -126,29 +141,35 @@ class Anzu {
     let createAnswer = (offer) => {
       // firefox と chrome のタイミング問題判定用 flag
       let is_ff = navigator.mozGetUserMedia !== undefined;
+      this.icecandidateCompleted = false;
+      this.addstreamCompleted = false;
       return new Promise((resolve, reject) => {
-        if (!is_ff) {
-          this.pc.onaddstream = (event) => {
-            this.stream = event.stream;
-          };
-        }
+        this.pc.onaddstream = (event) => {
+          this.addstreamCompleted = true;
+          this.stream = event.stream;
+          if (is_ff && this.icecandidateCompleted) {
+            resolve({ clientId: this.clientId, stream: this.stream });
+          }
+        };
         this.pc.setRemoteDescription(new RTCSessionDescription(offer), () => {
           this.pc.createAnswer((answer) => {
             this.sdplog("Downstream answer", offer);
             this.pc.setLocalDescription(answer, () => {
               this.sora.answer(answer.sdp);
               this.sendanswer = true;
-              if (is_ff) {
-                this.pc.onaddstream = (event) => {
-                  this.stream = event.stream;
-                  resolve({ clientId: this.clientId, stream: this.stream });
-                };
-              }
-              else {
-                resolve({ clientId: this.clientId, stream: this.stream });
-              }
+              setTimeout(() => {
+                if (!this.icecandidateCompleted) {
+                  reject("ICE failed");
+                }
+              }, 5000);
               this.pc.onicecandidate = (event) => {
-                if (event.candidate !== null) {
+                if (event.candidate === null) {
+                  this.icecandidateCompleted = true;
+                  if (this.addstreamCompleted) {
+                    resolve({ clientId: this.clientId, stream: this.stream });
+                  }
+                }
+                else {
                   console.info("====== candidate ======"); // eslint-disable-line
                   console.info(event.candidate); // eslint-disable-line
                   this.sora.candidate(event.candidate);
@@ -163,11 +184,45 @@ class Anzu {
       .then(createPeerConnection)
       .then(createAnswer);
   }
+  /**
+   * コンソールログを出力する
+   * @private
+   * @param {string} title - タイトル
+   * @param {string} target - ターゲット
+   */
   sdplog(title, target) {
     console.info("========== " + title + " =========="); // eslint-disable-line
     for (let i in target) {
       console.info(i + ":"); // eslint-disable-line
       console.info(target[i]); // eslint-disable-line
+    }
+  }
+  /**
+   * 切断する
+   */
+  disconnect() {
+    if (this.sora) {
+      this.sora.disconnect();
+    }
+  }
+  /**
+   * エラー時のコールバックを登録する
+   * @param {function} コールバック
+   */
+  onError(f) {
+    this._onError = f;
+    if (this.sora) {
+      this.sora.onError(f);
+    }
+  }
+  /**
+   * 切断時のコールバックを登録する
+   * @param {function} コールバック
+   */
+  onDisconnect(f) {
+    this._onDisconnect = f;
+    if (this.sora) {
+      this.sora.onDisconnect(f);
     }
   }
 }
