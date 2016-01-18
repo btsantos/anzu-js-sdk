@@ -85,15 +85,24 @@ class Anzu {
           this.pc.createAnswer((answer) => {
             this.sdplog("Upstream answer", offer);
             this.pc.setLocalDescription(answer, () => {
+              this.icecandidateCompleted = false;
               this.sora.answer(answer.sdp);
+              setTimeout(() => {
+                if (!this.icecandidateCompleted) {
+                  reject("ICE failed");
+                }
+              }, 5000);
               this.pc.onicecandidate = (event) => {
-                if (event.candidate !== null) {
+                if (event.candidate === null) {
+                  this.icecandidateCompleted = true;
+                  resolve({ clientId: this.clientId, stream: this.stream });
+                }
+                else {
                   console.info("====== candidate ======"); // eslint-disable-line
                   console.info(event.candidate); // eslint-disable-line
                   this.sora.candidate(event.candidate);
                 }
               };
-              resolve({ clientId: this.clientId, stream: this.stream });
             }, (error) => { reject(error); });
           }, (error) => { reject(error); });
         }, (error) => { reject(error); });
@@ -132,29 +141,35 @@ class Anzu {
     let createAnswer = (offer) => {
       // firefox と chrome のタイミング問題判定用 flag
       let is_ff = navigator.mozGetUserMedia !== undefined;
+      this.icecandidateCompleted = false;
+      this.addstreamCompleted = false;
       return new Promise((resolve, reject) => {
-        if (!is_ff) {
-          this.pc.onaddstream = (event) => {
-            this.stream = event.stream;
-          };
-        }
+        this.pc.onaddstream = (event) => {
+          this.addstreamCompleted = true;
+          this.stream = event.stream;
+          if (is_ff && this.icecandidateCompleted) {
+            resolve({ clientId: this.clientId, stream: this.stream });
+          }
+        };
         this.pc.setRemoteDescription(new RTCSessionDescription(offer), () => {
           this.pc.createAnswer((answer) => {
             this.sdplog("Downstream answer", offer);
             this.pc.setLocalDescription(answer, () => {
               this.sora.answer(answer.sdp);
               this.sendanswer = true;
-              if (is_ff) {
-                this.pc.onaddstream = (event) => {
-                  this.stream = event.stream;
-                  resolve({ clientId: this.clientId, stream: this.stream });
-                };
-              }
-              else {
-                resolve({ clientId: this.clientId, stream: this.stream });
-              }
+              setTimeout(() => {
+                if (!this.icecandidateCompleted) {
+                  reject("ICE failed");
+                }
+              }, 5000);
               this.pc.onicecandidate = (event) => {
-                if (event.candidate !== null) {
+                if (event.candidate === null) {
+                  this.icecandidateCompleted = true;
+                  if (this.addstreamCompleted) {
+                    resolve({ clientId: this.clientId, stream: this.stream });
+                  }
+                }
+                else {
                   console.info("====== candidate ======"); // eslint-disable-line
                   console.info(event.candidate); // eslint-disable-line
                   this.sora.candidate(event.candidate);
