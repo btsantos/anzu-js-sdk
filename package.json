@@ -52,6 +52,6 @@
   "dependencies": {
     "es6-promise": "^3.0.2",
     "isomorphic-fetch": "^2.2.0",
-    "sora-js-sdk": "shiguredo/sora-js-sdk#develop"
+    "sora-js-sdk": "shiguredo/sora-js-sdk#0.3.0"
   }
 }
