@@ -160,7 +160,7 @@ var Anzu = function () {
 
       var createOffer = function createOffer() {
         _this2.sora = new _soraJsSdk2.default(_this2.signalingUrl).connection();
-        _this2.sora.onError(_this2._onerror);
+        _this2.sora.onError(_this2._onError);
         _this2.sora.onDisconnect(_this2._onDisconnect);
         return _this2.sora.connect({
           role: "downstream",
