@@ -1,7 +1,7 @@
 /**
  * anzu-js-sdk
  * anzu-js-sdk
- * @version 0.4.1
+ * @version 0.4.2
  * @author Shiguredo Inc.
  * @license MIT
  */
@@ -93,7 +93,7 @@ var Anzu = function () {
       };
       var createOffer = function createOffer() {
         _this.sora = new _soraJsSdk2.default(_this.signalingUrl).connection();
-        _this.sora.onError(_this._onerror);
+        _this.sora.onError(_this._onError);
         _this.sora.onDisconnect(_this._onDisconnect);
         return _this.sora.connect({
           role: "upstream",
