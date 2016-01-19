@@ -62,7 +62,7 @@ class Anzu {
     };
     let createOffer = () => {
       this.sora = new Sora(this.signalingUrl).connection();
-      this.sora.onError(this._onerror);
+      this.sora.onError(this._onError);
       this.sora.onDisconnect(this._onDisconnect);
       return this.sora.connect({
         role: "upstream",
