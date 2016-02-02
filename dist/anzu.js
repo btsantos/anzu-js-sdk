@@ -291,7 +291,7 @@ module.exports = Anzu;
 /*!
  * sora-js-sdk
  * WebRTC SFU Sora Signaling Library
- * @version 0.3.0
+ * @version 0.3.1
  * @author Shiguredo Inc.
  * @license MIT
  */
@@ -348,7 +348,7 @@ var SoraConnection = (function () {
           _this._ws.send(message);
         };
         _this._ws.onclose = function (e) {
-          if (e.code === 4401) {
+          if (/440\d$/.test(e.code)) {
             reject(e);
           } else {
             _this._onclose(e);
