@@ -1,6 +1,6 @@
 {
   "name": "anzu-js-sdk",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "anzu-js-sdk",
   "main": "dist/anzu.js",
   "scripts": {
@@ -52,6 +52,6 @@
   "dependencies": {
     "es6-promise": "^3.0.2",
     "isomorphic-fetch": "^2.2.1",
-    "sora-js-sdk": "shiguredo/sora-js-sdk#0.3.0"
+    "sora-js-sdk": "shiguredo/sora-js-sdk#0.3.1"
   }
 }
