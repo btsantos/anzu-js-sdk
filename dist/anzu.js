@@ -1,7 +1,7 @@
 /**
  * anzu-js-sdk
  * anzu-js-sdk
- * @version 0.4.3
+ * @version 0.4.4
  * @author Shiguredo Inc.
  * @license MIT
  */
@@ -50,6 +50,7 @@ var Anzu = function () {
    * @param {string} token - アクセストークン
    * @param {object} [constraints={video: true, audio: true}] - LocalMediaStream オブジェクトがサポートするメディアタイプ
    */
+
 
   _createClass(Anzu, [{
     key: "start",
