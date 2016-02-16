@@ -144,7 +144,19 @@ var Anzu = function () {
           });
         });
       };
-      return getUserMedia(constraints).then(createOffer).then(createPeerConnection).then(createAnswer);
+      return getUserMedia(constraints).then(createOffer).then(createPeerConnection).then(createAnswer).catch(function (e) {
+        if (_this.stream) {
+          _this.stream.getTracks().forEach(function (t) {
+            t.stop();
+          });
+        }
+        if (_this.sora) {
+          _this.sora.disconnect();
+        }
+        _this.stream = null;
+        _this.sora = null;
+        return Promise.reject(e);
+      });
     }
     /**
      * ダウンストリームを開始する
@@ -223,7 +235,19 @@ var Anzu = function () {
           });
         });
       };
-      return createOffer().then(createPeerConnection).then(createAnswer);
+      return createOffer().then(createPeerConnection).then(createAnswer).catch(function (e) {
+        if (_this2.stream) {
+          _this2.stream.getTracks().forEach(function (t) {
+            t.stop();
+          });
+        }
+        if (_this2.sora) {
+          _this2.sora.disconnect();
+        }
+        _this2.stream = null;
+        _this2.sora = null;
+        return Promise.reject(e);
+      });
     }
     /**
      * コンソールログを出力する
