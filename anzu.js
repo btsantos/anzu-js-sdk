@@ -111,7 +111,20 @@ class Anzu {
     return getUserMedia(constraints)
       .then(createOffer)
       .then(createPeerConnection)
-      .then(createAnswer);
+      .then(createAnswer)
+      .catch(e => {
+        if (this.stream) {
+          this.stream.getTracks().forEach((t) => {
+            t.stop();
+          });
+        }
+        if (this.sora) {
+          this.sora.disconnect();
+        }
+        this.stream = null;
+        this.sora = null;
+        return Promise.reject(e);
+      });
   }
   /**
    * ダウンストリームを開始する
@@ -182,7 +195,20 @@ class Anzu {
     };
     return createOffer()
       .then(createPeerConnection)
-      .then(createAnswer);
+      .then(createAnswer)
+      .catch(e => {
+        if (this.stream) {
+          this.stream.getTracks().forEach((t) => {
+            t.stop();
+          });
+        }
+        if (this.sora) {
+          this.sora.disconnect();
+        }
+        this.stream = null;
+        this.sora = null;
+        return Promise.reject(e);
+      });
   }
   /**
    * コンソールログを出力する
