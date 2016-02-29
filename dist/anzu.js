@@ -113,20 +113,30 @@ var Anzu = function () {
       };
       var createAnswer = function createAnswer(offer) {
         return new Promise(function (resolve, reject) {
+          _this.icecandidateEstablished = false;
+          _this.pc.oniceconnectionstatechange = function (event) {
+            switch (_this.pc.iceConnectionState) {
+              case "connected":
+              case "completed":
+                _this.icecandidateEstablished = true;
+                break;
+            }
+          };
           _this.pc.setRemoteDescription(new RTCSessionDescription(offer), function () {
             _this.pc.createAnswer(function (answer) {
               _this.sdplog("Upstream answer", offer);
               _this.pc.setLocalDescription(answer, function () {
-                _this.icecandidateCompleted = false;
                 _this.sora.answer(answer.sdp);
                 setTimeout(function () {
-                  if (!_this.icecandidateCompleted) {
+                  if (_this.icecandidateEstablished) {
+                    resolve({ clientId: _this.clientId, stream: _this.stream });
+                  } else {
                     reject("ICE failed");
                   }
                 }, 5000);
                 _this.pc.onicecandidate = function (event) {
                   if (event.candidate === null) {
-                    _this.icecandidateCompleted = true;
+                    _this.icecandidateEstablished = true;
                     resolve({ clientId: _this.clientId, stream: _this.stream });
                   } else {
                     console.info("====== candidate ======"); // eslint-disable-line
@@ -192,14 +202,22 @@ var Anzu = function () {
       var createAnswer = function createAnswer(offer) {
         // firefox と chrome のタイミング問題判定用 flag
         var is_ff = navigator.mozGetUserMedia !== undefined;
-        _this2.icecandidateCompleted = false;
+        _this2.icecandidateEstablished = false;
         _this2.addstreamCompleted = false;
         return new Promise(function (resolve, reject) {
           _this2.pc.onaddstream = function (event) {
             _this2.addstreamCompleted = true;
             _this2.stream = event.stream;
-            if (is_ff && _this2.icecandidateCompleted) {
+            if (is_ff && _this2.icecandidateEstablished) {
               resolve({ clientId: _this2.clientId, stream: _this2.stream });
+            }
+          };
+          _this2.pc.oniceconnectionstatechange = function (event) {
+            switch (_this2.pc.iceConnectionState) {
+              case "connected":
+              case "completed":
+                _this2.icecandidateEstablished = true;
+                break;
             }
           };
           _this2.pc.setRemoteDescription(new RTCSessionDescription(offer), function () {
@@ -209,13 +227,15 @@ var Anzu = function () {
                 _this2.sora.answer(answer.sdp);
                 _this2.sendanswer = true;
                 setTimeout(function () {
-                  if (!_this2.icecandidateCompleted) {
+                  if (_this2.icecandidateEstablished && _this2.addstreamCompleted) {
+                    resolve({ clientId: _this2.clientId, stream: _this2.stream });
+                  } else {
                     reject("ICE failed");
                   }
                 }, 5000);
                 _this2.pc.onicecandidate = function (event) {
                   if (event.candidate === null) {
-                    _this2.icecandidateCompleted = true;
+                    console.log("event.candidate is null !!!");
                     if (_this2.addstreamCompleted) {
                       resolve({ clientId: _this2.clientId, stream: _this2.stream });
                     }
