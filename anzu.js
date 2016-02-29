@@ -81,20 +81,31 @@ class Anzu {
     };
     let createAnswer = (offer) => {
       return new Promise((resolve, reject) => {
+        this.icecandidateEstablished = false;
+        this.pc.oniceconnectionstatechange = (event) => {
+          switch (this.pc.iceConnectionState) {
+            case "connected":
+            case "completed":
+              this.icecandidateEstablished = true;
+              break;
+          }
+        };
         this.pc.setRemoteDescription(new RTCSessionDescription(offer), () => {
           this.pc.createAnswer((answer) => {
             this.sdplog("Upstream answer", offer);
             this.pc.setLocalDescription(answer, () => {
-              this.icecandidateCompleted = false;
               this.sora.answer(answer.sdp);
               setTimeout(() => {
-                if (!this.icecandidateCompleted) {
+                if (this.icecandidateEstablished) {
+                  resolve({ clientId: this.clientId, stream: this.stream });
+                }
+                else {
                   reject("ICE failed");
                 }
               }, 5000);
               this.pc.onicecandidate = (event) => {
                 if (event.candidate === null) {
-                  this.icecandidateCompleted = true;
+                  this.icecandidateEstablished = true;
                   resolve({ clientId: this.clientId, stream: this.stream });
                 }
                 else {
@@ -154,14 +165,22 @@ class Anzu {
     let createAnswer = (offer) => {
       // firefox と chrome のタイミング問題判定用 flag
       let is_ff = navigator.mozGetUserMedia !== undefined;
-      this.icecandidateCompleted = false;
+      this.icecandidateEstablished = false;
       this.addstreamCompleted = false;
       return new Promise((resolve, reject) => {
         this.pc.onaddstream = (event) => {
           this.addstreamCompleted = true;
           this.stream = event.stream;
-          if (is_ff && this.icecandidateCompleted) {
+          if (is_ff && this.icecandidateEstablished) {
             resolve({ clientId: this.clientId, stream: this.stream });
+          }
+        };
+        this.pc.oniceconnectionstatechange = (event) => {
+          switch (this.pc.iceConnectionState) {
+            case "connected":
+            case "completed":
+              this.icecandidateEstablished = true;
+              break;
           }
         };
         this.pc.setRemoteDescription(new RTCSessionDescription(offer), () => {
@@ -171,13 +190,16 @@ class Anzu {
               this.sora.answer(answer.sdp);
               this.sendanswer = true;
               setTimeout(() => {
-                if (!this.icecandidateCompleted) {
+                if (this.icecandidateEstablished && this.addstreamCompleted) {
+                  resolve({ clientId: this.clientId, stream: this.stream });
+                }
+                else {
                   reject("ICE failed");
                 }
               }, 5000);
               this.pc.onicecandidate = (event) => {
                 if (event.candidate === null) {
-                  this.icecandidateCompleted = true;
+                  this.icecandidateEstablished = true;
                   if (this.addstreamCompleted) {
                     resolve({ clientId: this.clientId, stream: this.stream });
                   }
