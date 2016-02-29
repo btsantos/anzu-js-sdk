@@ -1,7 +1,7 @@
 /**
  * anzu-js-sdk
  * anzu-js-sdk
- * @version 0.4.4
+ * @version 0.4.5
  * @author Shiguredo Inc.
  * @license MIT
  */
@@ -235,7 +235,7 @@ var Anzu = function () {
                 }, 5000);
                 _this2.pc.onicecandidate = function (event) {
                   if (event.candidate === null) {
-                    console.log("event.candidate is null !!!");
+                    _this2.icecandidateEstablished = true;
                     if (_this2.addstreamCompleted) {
                       resolve({ clientId: _this2.clientId, stream: _this2.stream });
                     }
