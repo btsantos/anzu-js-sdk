@@ -114,7 +114,7 @@ var Anzu = function () {
       var createAnswer = function createAnswer(offer) {
         return new Promise(function (resolve, reject) {
           _this.icecandidateEstablished = false;
-          _this.pc.oniceconnectionstatechange = function (event) {
+          _this.pc.oniceconnectionstatechange = function (_event) {
             switch (_this.pc.iceConnectionState) {
               case "connected":
               case "completed":
@@ -212,7 +212,7 @@ var Anzu = function () {
               resolve({ clientId: _this2.clientId, stream: _this2.stream });
             }
           };
-          _this2.pc.oniceconnectionstatechange = function (event) {
+          _this2.pc.oniceconnectionstatechange = function (_event) {
             switch (_this2.pc.iceConnectionState) {
               case "connected":
               case "completed":
