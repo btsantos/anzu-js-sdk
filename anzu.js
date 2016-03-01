@@ -82,7 +82,7 @@ class Anzu {
     let createAnswer = (offer) => {
       return new Promise((resolve, reject) => {
         this.icecandidateEstablished = false;
-        this.pc.oniceconnectionstatechange = (event) => {
+        this.pc.oniceconnectionstatechange = (_event) => {
           switch (this.pc.iceConnectionState) {
             case "connected":
             case "completed":
@@ -175,7 +175,7 @@ class Anzu {
             resolve({ clientId: this.clientId, stream: this.stream });
           }
         };
-        this.pc.oniceconnectionstatechange = (event) => {
+        this.pc.oniceconnectionstatechange = (_event) => {
           switch (this.pc.iceConnectionState) {
             case "connected":
             case "completed":
