@@ -1,7 +1,7 @@
 /**
  * anzu-js-sdk
  * anzu-js-sdk
- * @version 0.4.6
+ * @version 0.4.7
  * @author Shiguredo Inc.
  * @license MIT
  */
