@@ -1,7 +1,7 @@
 /**
  * anzu-js-sdk
  * anzu-js-sdk
- * @version 0.4.6
+ * @version 0.4.7
  * @author Shiguredo Inc.
  * @license MIT
  */
@@ -113,13 +113,22 @@ var Anzu = function () {
       };
       var createAnswer = function createAnswer(offer) {
         return new Promise(function (resolve, reject) {
-          _this.icecandidateEstablished = false;
-          _this.pc.oniceconnectionstatechange = function (_event) {
+          _this.pc.oniceconnectionstatechange = function (event) {
             switch (_this.pc.iceConnectionState) {
               case "connected":
               case "completed":
-                _this.icecandidateEstablished = true;
+                resolve({ clientId: _this.clientId, stream: _this.stream });
                 break;
+              case "failed":
+                reject(event);
+                break;
+            }
+          };
+          _this.pc.onicecandidate = function (event) {
+            console.info("====== candidate ======"); // eslint-disable-line
+            console.info(event.candidate); // eslint-disable-line
+            if (event.candidate !== null) {
+              _this.sora.candidate(event.candidate);
             }
           };
           _this.pc.setRemoteDescription(new RTCSessionDescription(offer), function () {
@@ -127,23 +136,6 @@ var Anzu = function () {
               _this.sdplog("Upstream answer", offer);
               _this.pc.setLocalDescription(answer, function () {
                 _this.sora.answer(answer.sdp);
-                setTimeout(function () {
-                  if (_this.icecandidateEstablished) {
-                    resolve({ clientId: _this.clientId, stream: _this.stream });
-                  } else {
-                    reject("ICE failed");
-                  }
-                }, 5000);
-                _this.pc.onicecandidate = function (event) {
-                  if (event.candidate === null) {
-                    _this.icecandidateEstablished = true;
-                    resolve({ clientId: _this.clientId, stream: _this.stream });
-                  } else {
-                    console.info("====== candidate ======"); // eslint-disable-line
-                    console.info(event.candidate); // eslint-disable-line
-                    _this.sora.candidate(event.candidate);
-                  }
-                };
               }, function (error) {
                 reject(error);
               });
@@ -164,8 +156,12 @@ var Anzu = function () {
         if (_this.sora) {
           _this.sora.disconnect();
         }
+        if (_this.pc && _this.pc.signalingState !== "closed") {
+          _this.pc.close();
+        }
         _this.stream = null;
         _this.sora = null;
+        _this.pc = null;
         return Promise.reject(e);
       });
     }
@@ -202,22 +198,35 @@ var Anzu = function () {
       var createAnswer = function createAnswer(offer) {
         // firefox と chrome のタイミング問題判定用 flag
         var is_ff = navigator.mozGetUserMedia !== undefined;
-        _this2.icecandidateEstablished = false;
+        _this2.icecandidateConnected = false;
         _this2.addstreamCompleted = false;
         return new Promise(function (resolve, reject) {
           _this2.pc.onaddstream = function (event) {
             _this2.addstreamCompleted = true;
             _this2.stream = event.stream;
-            if (is_ff && _this2.icecandidateEstablished) {
+            if (is_ff && _this2.icecandidateConnected) {
               resolve({ clientId: _this2.clientId, stream: _this2.stream });
             }
           };
-          _this2.pc.oniceconnectionstatechange = function (_event) {
+          _this2.pc.oniceconnectionstatechange = function (event) {
             switch (_this2.pc.iceConnectionState) {
               case "connected":
               case "completed":
-                _this2.icecandidateEstablished = true;
+                _this2.icecandidateConnected = true;
+                if (is_ff && _this2.addstreamCompleted) {
+                  resolve({ clientId: _this2.clientId, stream: _this2.stream });
+                }
                 break;
+              case "failed":
+                reject(event);
+                break;
+            }
+          };
+          _this2.pc.onicecandidate = function (event) {
+            console.info("====== candidate ======"); // eslint-disable-line
+            console.info(event.candidate); // eslint-disable-line
+            if (event.candidate !== null) {
+              _this2.sora.candidate(event.candidate);
             }
           };
           _this2.pc.setRemoteDescription(new RTCSessionDescription(offer), function () {
@@ -225,26 +234,6 @@ var Anzu = function () {
               _this2.sdplog("Downstream answer", offer);
               _this2.pc.setLocalDescription(answer, function () {
                 _this2.sora.answer(answer.sdp);
-                _this2.sendanswer = true;
-                setTimeout(function () {
-                  if (_this2.icecandidateEstablished && _this2.addstreamCompleted) {
-                    resolve({ clientId: _this2.clientId, stream: _this2.stream });
-                  } else {
-                    reject("ICE failed");
-                  }
-                }, 5000);
-                _this2.pc.onicecandidate = function (event) {
-                  if (event.candidate === null) {
-                    _this2.icecandidateEstablished = true;
-                    if (_this2.addstreamCompleted) {
-                      resolve({ clientId: _this2.clientId, stream: _this2.stream });
-                    }
-                  } else {
-                    console.info("====== candidate ======"); // eslint-disable-line
-                    console.info(event.candidate); // eslint-disable-line
-                    _this2.sora.candidate(event.candidate);
-                  }
-                };
               }, function (error) {
                 reject(error);
               });
@@ -265,8 +254,12 @@ var Anzu = function () {
         if (_this2.sora) {
           _this2.sora.disconnect();
         }
+        if (_this2.pc && _this2.pc.signalingState !== "closed") {
+          _this2.pc.close();
+        }
         _this2.stream = null;
         _this2.sora = null;
+        _this2.pc = null;
         return Promise.reject(e);
       });
     }

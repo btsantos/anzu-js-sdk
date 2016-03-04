@@ -81,13 +81,22 @@ class Anzu {
     };
     let createAnswer = (offer) => {
       return new Promise((resolve, reject) => {
-        this.icecandidateEstablished = false;
-        this.pc.oniceconnectionstatechange = (_event) => {
+        this.pc.oniceconnectionstatechange = (event) => {
           switch (this.pc.iceConnectionState) {
             case "connected":
             case "completed":
-              this.icecandidateEstablished = true;
+              resolve({ clientId: this.clientId, stream: this.stream });
               break;
+            case "failed":
+              reject(event);
+              break;
+          }
+        };
+        this.pc.onicecandidate = (event) => {
+          console.info("====== candidate ======"); // eslint-disable-line
+          console.info(event.candidate); // eslint-disable-line
+          if (event.candidate !== null) {
+            this.sora.candidate(event.candidate);
           }
         };
         this.pc.setRemoteDescription(new RTCSessionDescription(offer), () => {
@@ -95,25 +104,6 @@ class Anzu {
             this.sdplog("Upstream answer", offer);
             this.pc.setLocalDescription(answer, () => {
               this.sora.answer(answer.sdp);
-              setTimeout(() => {
-                if (this.icecandidateEstablished) {
-                  resolve({ clientId: this.clientId, stream: this.stream });
-                }
-                else {
-                  reject("ICE failed");
-                }
-              }, 5000);
-              this.pc.onicecandidate = (event) => {
-                if (event.candidate === null) {
-                  this.icecandidateEstablished = true;
-                  resolve({ clientId: this.clientId, stream: this.stream });
-                }
-                else {
-                  console.info("====== candidate ======"); // eslint-disable-line
-                  console.info(event.candidate); // eslint-disable-line
-                  this.sora.candidate(event.candidate);
-                }
-              };
             }, (error) => { reject(error); });
           }, (error) => { reject(error); });
         }, (error) => { reject(error); });
@@ -132,8 +122,12 @@ class Anzu {
         if (this.sora) {
           this.sora.disconnect();
         }
+        if (this.pc && (this.pc.signalingState !== "closed")) {
+          this.pc.close();
+        }
         this.stream = null;
         this.sora = null;
+        this.pc = null;
         return Promise.reject(e);
       });
   }
@@ -165,22 +159,35 @@ class Anzu {
     let createAnswer = (offer) => {
       // firefox と chrome のタイミング問題判定用 flag
       let is_ff = navigator.mozGetUserMedia !== undefined;
-      this.icecandidateEstablished = false;
+      this.icecandidateConnected = false;
       this.addstreamCompleted = false;
       return new Promise((resolve, reject) => {
         this.pc.onaddstream = (event) => {
           this.addstreamCompleted = true;
           this.stream = event.stream;
-          if (is_ff && this.icecandidateEstablished) {
+          if (is_ff && this.icecandidateConnected) {
             resolve({ clientId: this.clientId, stream: this.stream });
           }
         };
-        this.pc.oniceconnectionstatechange = (_event) => {
+        this.pc.oniceconnectionstatechange = (event) => {
           switch (this.pc.iceConnectionState) {
             case "connected":
             case "completed":
-              this.icecandidateEstablished = true;
+              this.icecandidateConnected = true;
+              if (is_ff && this.addstreamCompleted) {
+                resolve({ clientId: this.clientId, stream: this.stream });
+              }
               break;
+            case "failed":
+              reject(event);
+              break;
+          }
+        };
+        this.pc.onicecandidate = (event) => {
+          console.info("====== candidate ======"); // eslint-disable-line
+          console.info(event.candidate); // eslint-disable-line
+          if (event.candidate !== null) {
+            this.sora.candidate(event.candidate);
           }
         };
         this.pc.setRemoteDescription(new RTCSessionDescription(offer), () => {
@@ -188,28 +195,6 @@ class Anzu {
             this.sdplog("Downstream answer", offer);
             this.pc.setLocalDescription(answer, () => {
               this.sora.answer(answer.sdp);
-              this.sendanswer = true;
-              setTimeout(() => {
-                if (this.icecandidateEstablished && this.addstreamCompleted) {
-                  resolve({ clientId: this.clientId, stream: this.stream });
-                }
-                else {
-                  reject("ICE failed");
-                }
-              }, 5000);
-              this.pc.onicecandidate = (event) => {
-                if (event.candidate === null) {
-                  this.icecandidateEstablished = true;
-                  if (this.addstreamCompleted) {
-                    resolve({ clientId: this.clientId, stream: this.stream });
-                  }
-                }
-                else {
-                  console.info("====== candidate ======"); // eslint-disable-line
-                  console.info(event.candidate); // eslint-disable-line
-                  this.sora.candidate(event.candidate);
-                }
-              };
             }, (error) => { reject(error); });
           }, (error) => { reject(error); });
         }, (error) => { reject(error); });
@@ -227,8 +212,12 @@ class Anzu {
         if (this.sora) {
           this.sora.disconnect();
         }
+        if (this.pc && (this.pc.signalingState !== "closed")) {
+          this.pc.close();
+        }
         this.stream = null;
         this.sora = null;
+        this.pc = null;
         return Promise.reject(e);
       });
   }
