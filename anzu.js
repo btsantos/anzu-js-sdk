@@ -122,8 +122,12 @@ class Anzu {
         if (this.sora) {
           this.sora.disconnect();
         }
+        if (this.pc && (this.pc.signalingState !== "closed")) {
+          this.pc.close();
+        }
         this.stream = null;
         this.sora = null;
+        this.pc = null;
         return Promise.reject(e);
       });
   }
@@ -208,8 +212,12 @@ class Anzu {
         if (this.sora) {
           this.sora.disconnect();
         }
+        if (this.pc && (this.pc.signalingState !== "closed")) {
+          this.pc.close();
+        }
         this.stream = null;
         this.sora = null;
+        this.pc = null;
         return Promise.reject(e);
       });
   }

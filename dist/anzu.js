@@ -156,8 +156,12 @@ var Anzu = function () {
         if (_this.sora) {
           _this.sora.disconnect();
         }
+        if (_this.pc && _this.pc.signalingState !== "closed") {
+          _this.pc.close();
+        }
         _this.stream = null;
         _this.sora = null;
+        _this.pc = null;
         return Promise.reject(e);
       });
     }
@@ -250,8 +254,12 @@ var Anzu = function () {
         if (_this2.sora) {
           _this2.sora.disconnect();
         }
+        if (_this2.pc && _this2.pc.signalingState !== "closed") {
+          _this2.pc.close();
+        }
         _this2.stream = null;
         _this2.sora = null;
+        _this2.pc = null;
         return Promise.reject(e);
       });
     }
