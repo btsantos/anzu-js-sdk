@@ -52,6 +52,7 @@ class Anzu {
       return new Promise((resolve, reject) => {
         if (navigator.getUserMedia) {
           navigator.getUserMedia(constraints, (stream) => {
+            this.trace("Upstream getUserMedia constraints", constraints);
             this.stream = stream;
             resolve({ stream: stream });
           }, (err) => { reject(err); });
@@ -71,7 +72,9 @@ class Anzu {
       });
     };
     let createPeerConnection = (offer) => {
-      this.sdplog("Upstream Offer", offer);
+      this.trace("Upstream Offer sdp", offer.sdp);
+      this.trace("Upstream Offer clientId", offer.clientId);
+      this.trace("Upstream Offer iceServers", offer.iceServers);
       return new Promise((resolve, _reject) => {
         this.clientId = offer.clientId;
         this.pc = new RTCPeerConnection({ iceServers: offer.iceServers });
@@ -82,6 +85,7 @@ class Anzu {
     let createAnswer = (offer) => {
       return new Promise((resolve, reject) => {
         this.pc.oniceconnectionstatechange = (event) => {
+          this.trace("Upstream oniceconnectionstatechange", this.pc.iceConnectionState);
           switch (this.pc.iceConnectionState) {
             case "connected":
             case "completed":
@@ -93,15 +97,14 @@ class Anzu {
           }
         };
         this.pc.onicecandidate = (event) => {
-          console.info("====== candidate ======"); // eslint-disable-line
-          console.info(event.candidate); // eslint-disable-line
+          this.trace("Upstream onicecandidate", event.candidate);
           if (event.candidate !== null) {
             this.sora.candidate(event.candidate);
           }
         };
         this.pc.setRemoteDescription(new RTCSessionDescription(offer), () => {
           this.pc.createAnswer((answer) => {
-            this.sdplog("Upstream answer", offer);
+            this.trace("Upstream answer sdp", answer.sdp);
             this.pc.setLocalDescription(answer, () => {
               this.sora.answer(answer.sdp);
             }, (error) => { reject(error); });
@@ -149,7 +152,9 @@ class Anzu {
       });
     };
     let createPeerConnection = (offer) => {
-      this.sdplog("Downstream offer", offer);
+      this.trace("Downstream offer sdp", offer.sdp);
+      this.trace("Downstream offer clientId", offer.clientId);
+      this.trace("Downstream offer iceServers", offer.iceServers);
       return new Promise((resolve, _reject) => {
         this.clientId = offer.clientId;
         this.pc = new RTCPeerConnection({ iceServers: offer.iceServers });
@@ -164,11 +169,13 @@ class Anzu {
         this.pc.onaddstream = (event) => {
           this.addstreamCompleted = true;
           this.stream = event.stream;
+          this.trace("Downstream onaddstream", event.stream.id);
           if (this.icecandidateConnected) {
             resolve({ clientId: this.clientId, stream: this.stream });
           }
         };
         this.pc.oniceconnectionstatechange = (event) => {
+          this.trace("Downstream oniceconnectionstatechange", this.pc.iceConnectionState);
           switch (this.pc.iceConnectionState) {
             case "connected":
             case "completed":
@@ -183,15 +190,14 @@ class Anzu {
           }
         };
         this.pc.onicecandidate = (event) => {
-          console.info("====== candidate ======"); // eslint-disable-line
-          console.info(event.candidate); // eslint-disable-line
+          this.trace("Downstream onicecandidate", event.candidate);
           if (event.candidate !== null) {
             this.sora.candidate(event.candidate);
           }
         };
         this.pc.setRemoteDescription(new RTCSessionDescription(offer), () => {
           this.pc.createAnswer((answer) => {
-            this.sdplog("Downstream answer", offer);
+            this.trace("Downstream answer sdp", answer.sdp);
             this.pc.setLocalDescription(answer, () => {
               this.sora.answer(answer.sdp);
             }, (error) => { reject(error); });
@@ -223,14 +229,20 @@ class Anzu {
   /**
    * コンソールログを出力する
    * @private
-   * @param {string} title - タイトル
-   * @param {string} target - ターゲット
+   * @param {string} text - タイトル
+   * @param {string|object} value - 値
    */
-  sdplog(title, target) {
-    console.info("========== " + title + " =========="); // eslint-disable-line
-    for (let i in target) {
-      console.info(i + ":"); // eslint-disable-line
-      console.info(target[i]); // eslint-disable-line
+  trace(text, value) {
+    let now = "";
+    if (window.performance) {
+      now = (window.performance.now() / 1000).toFixed(3) + ": ";
+    }
+
+    if (typeof value === "object" && value !== null) {
+      console.info(now + text + "\n" + JSON.stringify(value, null, 2)); // eslint-disable-line
+    }
+    else {
+      console.info(now + text + "\n" + value); // eslint-disable-line
     }
   }
   /**
