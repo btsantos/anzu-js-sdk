@@ -234,11 +234,10 @@ class Anzu {
     }
     this.sora = null;
     if (this.pc && (this.pc.signalingState !== "closed")) {
-      this.pc.oniceconnectionstatechange = (event) => {
-        this.pc = null;
-      }
+      this.pc.oniceconnectionstatechange = null;
       this.pc.close();
     }
+    this.pc = null;
   }
   /**
    * エラー時のコールバックを登録する

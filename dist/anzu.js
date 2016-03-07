@@ -272,8 +272,6 @@ var Anzu = function () {
   }, {
     key: "disconnect",
     value: function disconnect() {
-      var _this3 = this;
-
       if (this.stream) {
         this.stream.getTracks().forEach(function (t) {
           t.stop();
@@ -285,11 +283,10 @@ var Anzu = function () {
       }
       this.sora = null;
       if (this.pc && this.pc.signalingState !== "closed") {
-        this.pc.oniceconnectionstatechange = function (event) {
-          _this3.pc = null;
-        };
+        this.pc.oniceconnectionstatechange = null;
         this.pc.close();
       }
+      this.pc = null;
     }
     /**
      * エラー時のコールバックを登録する
