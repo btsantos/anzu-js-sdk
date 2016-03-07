@@ -158,14 +158,13 @@ class Anzu {
     };
     let createAnswer = (offer) => {
       // firefox と chrome のタイミング問題判定用 flag
-      let is_ff = navigator.mozGetUserMedia !== undefined;
       this.icecandidateConnected = false;
       this.addstreamCompleted = false;
       return new Promise((resolve, reject) => {
         this.pc.onaddstream = (event) => {
           this.addstreamCompleted = true;
           this.stream = event.stream;
-          if (is_ff && this.icecandidateConnected) {
+          if (this.icecandidateConnected) {
             resolve({ clientId: this.clientId, stream: this.stream });
           }
         };
@@ -174,7 +173,7 @@ class Anzu {
             case "connected":
             case "completed":
               this.icecandidateConnected = true;
-              if (is_ff && this.addstreamCompleted) {
+              if (this.addstreamCompleted) {
                 resolve({ clientId: this.clientId, stream: this.stream });
               }
               break;
