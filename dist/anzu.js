@@ -153,20 +153,7 @@ var Anzu = function () {
         });
       };
       return getUserMedia(constraints).then(createOffer).then(createPeerConnection).then(createAnswer).catch(function (e) {
-        if (_this.stream) {
-          _this.stream.getTracks().forEach(function (t) {
-            t.stop();
-          });
-        }
-        if (_this.sora) {
-          _this.sora.disconnect();
-        }
-        if (_this.pc && _this.pc.signalingState !== "closed") {
-          _this.pc.close();
-        }
-        _this.stream = null;
-        _this.sora = null;
-        _this.pc = null;
+        _this.disconnect();
         return Promise.reject(e);
       });
     }
@@ -253,20 +240,7 @@ var Anzu = function () {
         });
       };
       return createOffer().then(createPeerConnection).then(createAnswer).catch(function (e) {
-        if (_this2.stream) {
-          _this2.stream.getTracks().forEach(function (t) {
-            t.stop();
-          });
-        }
-        if (_this2.sora) {
-          _this2.sora.disconnect();
-        }
-        if (_this2.pc && _this2.pc.signalingState !== "closed") {
-          _this2.pc.close();
-        }
-        _this2.stream = null;
-        _this2.sora = null;
-        _this2.pc = null;
+        _this2.disconnect();
         return Promise.reject(e);
       });
     }
@@ -298,8 +272,23 @@ var Anzu = function () {
   }, {
     key: "disconnect",
     value: function disconnect() {
+      var _this3 = this;
+
+      if (this.stream) {
+        this.stream.getTracks().forEach(function (t) {
+          t.stop();
+        });
+      }
+      this.stream = null;
       if (this.sora) {
         this.sora.disconnect();
+      }
+      this.sora = null;
+      if (this.pc && this.pc.signalingState !== "closed") {
+        this.pc.oniceconnectionstatechange = function (event) {
+          _this3.pc = null;
+        };
+        this.pc.close();
       }
     }
     /**

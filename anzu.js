@@ -117,20 +117,7 @@ class Anzu {
       .then(createPeerConnection)
       .then(createAnswer)
       .catch(e => {
-        if (this.stream) {
-          this.stream.getTracks().forEach((t) => {
-            t.stop();
-          });
-        }
-        if (this.sora) {
-          this.sora.disconnect();
-        }
-        if (this.pc && (this.pc.signalingState !== "closed")) {
-          this.pc.close();
-        }
-        this.stream = null;
-        this.sora = null;
-        this.pc = null;
+        this.disconnect();
         return Promise.reject(e);
       });
   }
@@ -209,20 +196,7 @@ class Anzu {
       .then(createPeerConnection)
       .then(createAnswer)
       .catch(e => {
-        if (this.stream) {
-          this.stream.getTracks().forEach((t) => {
-            t.stop();
-          });
-        }
-        if (this.sora) {
-          this.sora.disconnect();
-        }
-        if (this.pc && (this.pc.signalingState !== "closed")) {
-          this.pc.close();
-        }
-        this.stream = null;
-        this.sora = null;
-        this.pc = null;
+        this.disconnect();
         return Promise.reject(e);
       });
   }
@@ -249,8 +223,21 @@ class Anzu {
    * 切断する
    */
   disconnect() {
+    if (this.stream) {
+      this.stream.getTracks().forEach((t) => {
+        t.stop();
+      });
+    }
+    this.stream = null;
     if (this.sora) {
       this.sora.disconnect();
+    }
+    this.sora = null;
+    if (this.pc && (this.pc.signalingState !== "closed")) {
+      this.pc.oniceconnectionstatechange = (event) => {
+        this.pc = null;
+      }
+      this.pc.close();
     }
   }
   /**
@@ -272,6 +259,7 @@ class Anzu {
     if (this.sora) {
       this.sora.onDisconnect(f);
     }
+
   }
 }
 
