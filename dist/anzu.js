@@ -197,14 +197,13 @@ var Anzu = function () {
       };
       var createAnswer = function createAnswer(offer) {
         // firefox と chrome のタイミング問題判定用 flag
-        var is_ff = navigator.mozGetUserMedia !== undefined;
         _this2.icecandidateConnected = false;
         _this2.addstreamCompleted = false;
         return new Promise(function (resolve, reject) {
           _this2.pc.onaddstream = function (event) {
             _this2.addstreamCompleted = true;
             _this2.stream = event.stream;
-            if (is_ff && _this2.icecandidateConnected) {
+            if (_this2.icecandidateConnected) {
               resolve({ clientId: _this2.clientId, stream: _this2.stream });
             }
           };
@@ -213,7 +212,7 @@ var Anzu = function () {
               case "connected":
               case "completed":
                 _this2.icecandidateConnected = true;
-                if (is_ff && _this2.addstreamCompleted) {
+                if (_this2.addstreamCompleted) {
                   resolve({ clientId: _this2.clientId, stream: _this2.stream });
                 }
                 break;
