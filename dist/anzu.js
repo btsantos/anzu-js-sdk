@@ -1,12 +1,14 @@
 /**
  * anzu-js-sdk
  * anzu-js-sdk
- * @version 0.4.8
+ * @version 0.4.9
  * @author Shiguredo Inc.
  * @license MIT
  */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Anzu = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 "use strict";
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -82,6 +84,7 @@ var Anzu = function () {
         return new Promise(function (resolve, reject) {
           if (navigator.getUserMedia) {
             navigator.getUserMedia(constraints, function (stream) {
+              _this.trace("Upstream getUserMedia constraints", constraints);
               _this.stream = stream;
               resolve({ stream: stream });
             }, function (err) {
@@ -103,7 +106,9 @@ var Anzu = function () {
         });
       };
       var createPeerConnection = function createPeerConnection(offer) {
-        _this.sdplog("Upstream Offer", offer);
+        _this.trace("Upstream Offer sdp", offer.sdp);
+        _this.trace("Upstream Offer clientId", offer.clientId);
+        _this.trace("Upstream Offer iceServers", offer.iceServers);
         return new Promise(function (resolve, _reject) {
           _this.clientId = offer.clientId;
           _this.pc = new RTCPeerConnection({ iceServers: offer.iceServers });
@@ -114,6 +119,7 @@ var Anzu = function () {
       var createAnswer = function createAnswer(offer) {
         return new Promise(function (resolve, reject) {
           _this.pc.oniceconnectionstatechange = function (event) {
+            _this.trace("Upstream oniceconnectionstatechange", _this.pc.iceConnectionState);
             switch (_this.pc.iceConnectionState) {
               case "connected":
               case "completed":
@@ -125,15 +131,14 @@ var Anzu = function () {
             }
           };
           _this.pc.onicecandidate = function (event) {
-            console.info("====== candidate ======"); // eslint-disable-line
-            console.info(event.candidate); // eslint-disable-line
+            _this.trace("Upstream onicecandidate", event.candidate);
             if (event.candidate !== null) {
               _this.sora.candidate(event.candidate);
             }
           };
           _this.pc.setRemoteDescription(new RTCSessionDescription(offer), function () {
             _this.pc.createAnswer(function (answer) {
-              _this.sdplog("Upstream answer", offer);
+              _this.trace("Upstream answer sdp", answer.sdp);
               _this.pc.setLocalDescription(answer, function () {
                 _this.sora.answer(answer.sdp);
               }, function (error) {
@@ -148,20 +153,7 @@ var Anzu = function () {
         });
       };
       return getUserMedia(constraints).then(createOffer).then(createPeerConnection).then(createAnswer).catch(function (e) {
-        if (_this.stream) {
-          _this.stream.getTracks().forEach(function (t) {
-            t.stop();
-          });
-        }
-        if (_this.sora) {
-          _this.sora.disconnect();
-        }
-        if (_this.pc && _this.pc.signalingState !== "closed") {
-          _this.pc.close();
-        }
-        _this.stream = null;
-        _this.sora = null;
-        _this.pc = null;
+        _this.disconnect();
         return Promise.reject(e);
       });
     }
@@ -188,7 +180,9 @@ var Anzu = function () {
         });
       };
       var createPeerConnection = function createPeerConnection(offer) {
-        _this2.sdplog("Downstream offer", offer);
+        _this2.trace("Downstream offer sdp", offer.sdp);
+        _this2.trace("Downstream offer clientId", offer.clientId);
+        _this2.trace("Downstream offer iceServers", offer.iceServers);
         return new Promise(function (resolve, _reject) {
           _this2.clientId = offer.clientId;
           _this2.pc = new RTCPeerConnection({ iceServers: offer.iceServers });
@@ -203,11 +197,13 @@ var Anzu = function () {
           _this2.pc.onaddstream = function (event) {
             _this2.addstreamCompleted = true;
             _this2.stream = event.stream;
+            _this2.trace("Downstream onaddstream", event.stream.id);
             if (_this2.icecandidateConnected) {
               resolve({ clientId: _this2.clientId, stream: _this2.stream });
             }
           };
           _this2.pc.oniceconnectionstatechange = function (event) {
+            _this2.trace("Downstream oniceconnectionstatechange", _this2.pc.iceConnectionState);
             switch (_this2.pc.iceConnectionState) {
               case "connected":
               case "completed":
@@ -222,15 +218,14 @@ var Anzu = function () {
             }
           };
           _this2.pc.onicecandidate = function (event) {
-            console.info("====== candidate ======"); // eslint-disable-line
-            console.info(event.candidate); // eslint-disable-line
+            _this2.trace("Downstream onicecandidate", event.candidate);
             if (event.candidate !== null) {
               _this2.sora.candidate(event.candidate);
             }
           };
           _this2.pc.setRemoteDescription(new RTCSessionDescription(offer), function () {
             _this2.pc.createAnswer(function (answer) {
-              _this2.sdplog("Downstream answer", offer);
+              _this2.trace("Downstream answer sdp", answer.sdp);
               _this2.pc.setLocalDescription(answer, function () {
                 _this2.sora.answer(answer.sdp);
               }, function (error) {
@@ -245,38 +240,30 @@ var Anzu = function () {
         });
       };
       return createOffer().then(createPeerConnection).then(createAnswer).catch(function (e) {
-        if (_this2.stream) {
-          _this2.stream.getTracks().forEach(function (t) {
-            t.stop();
-          });
-        }
-        if (_this2.sora) {
-          _this2.sora.disconnect();
-        }
-        if (_this2.pc && _this2.pc.signalingState !== "closed") {
-          _this2.pc.close();
-        }
-        _this2.stream = null;
-        _this2.sora = null;
-        _this2.pc = null;
+        _this2.disconnect();
         return Promise.reject(e);
       });
     }
     /**
      * コンソールログを出力する
      * @private
-     * @param {string} title - タイトル
-     * @param {string} target - ターゲット
+     * @param {string} text - タイトル
+     * @param {string|object} value - 値
      */
 
   }, {
-    key: "sdplog",
-    value: function sdplog(title, target) {
-      console.info("========== " + title + " =========="); // eslint-disable-line
-      for (var i in target) {
-        console.info(i + ":"); // eslint-disable-line
-        console.info(target[i]); // eslint-disable-line
+    key: "trace",
+    value: function trace(text, value) {
+      var now = "";
+      if (window.performance) {
+        now = (window.performance.now() / 1000).toFixed(3) + ": ";
       }
+
+      if ((typeof value === "undefined" ? "undefined" : _typeof(value)) === "object" && value !== null) {
+        console.info(now + text + "\n" + JSON.stringify(value, null, 2)); // eslint-disable-line
+      } else {
+          console.info(now + text + "\n" + value); // eslint-disable-line
+        }
     }
     /**
      * 切断する
@@ -285,9 +272,21 @@ var Anzu = function () {
   }, {
     key: "disconnect",
     value: function disconnect() {
+      if (this.stream) {
+        this.stream.getTracks().forEach(function (t) {
+          t.stop();
+        });
+      }
+      this.stream = null;
       if (this.sora) {
         this.sora.disconnect();
       }
+      this.sora = null;
+      if (this.pc && this.pc.signalingState !== "closed") {
+        this.pc.oniceconnectionstatechange = null;
+        this.pc.close();
+      }
+      this.pc = null;
     }
     /**
      * エラー時のコールバックを登録する
