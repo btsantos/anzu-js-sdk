@@ -15,8 +15,8 @@ FIX
 0.4.x
 =====
 
-develop
--------
+0.4.9
+-----
 
 - [UPDATE] console.info 出力に経過時間を追加する
 - [UPDATE] disconnect メソッドに stream, peerConnection, WebSocket の後処理を移動する

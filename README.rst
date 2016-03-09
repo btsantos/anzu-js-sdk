@@ -2,7 +2,7 @@
 Anzu JavaScript SDK
 ###################
 
-:バージョン: 0.3.0
+:バージョン: 0.4.9
 
 `WebRTC SFU as a Service Anzu <https://anzu.shiguredo.jp>`_ をブラウザから扱うための SDK です。
 
