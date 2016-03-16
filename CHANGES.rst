@@ -11,6 +11,13 @@ CHANGE
 FIX
     バグ修正
 
+0.5.x
+=====
+
+0.5.0
+-----
+
+- [UPDATE] Data 構造に metadata を追加する
 
 0.4.x
 =====
