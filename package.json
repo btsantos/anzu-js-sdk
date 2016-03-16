@@ -4,7 +4,7 @@
   "description": "anzu-js-sdk",
   "main": "dist/anzu.js",
   "scripts": {
-    "lint": "gulp eslint",
+    "lint": "eslint anzu.js",
     "dist": "gulp dist",
     "doc": "gulp jsdoc",
     "test": "karma start"
