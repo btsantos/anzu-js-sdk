@@ -58,12 +58,13 @@ var Anzu = function () {
     key: "start",
     value: function start(channelId, token) {
       var constraints = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+      var codecType = arguments.length <= 3 || arguments[3] === undefined ? "VP8" : arguments[3];
 
       if (this.role === "upstream") {
         var c = constraints === null ? { video: true, audio: true } : constraints;
-        return this._startUpstream(channelId, token, c);
+        return this._startUpstream(channelId, token, c, codecType);
       } else if (this.role === "downstream") {
-        return this._startDownstream(channelId, token);
+        return this._startDownstream(channelId, token, codecType);
       }
     }
     /**
@@ -77,7 +78,7 @@ var Anzu = function () {
 
   }, {
     key: "_startUpstream",
-    value: function _startUpstream(channelId, upstreamToken, constraints) {
+    value: function _startUpstream(channelId, upstreamToken, constraints, codecType) {
       var _this = this;
 
       var getUserMedia = function getUserMedia(constraints) {
@@ -102,7 +103,8 @@ var Anzu = function () {
         return _this.sora.connect({
           role: "upstream",
           channelId: channelId,
-          accessToken: upstreamToken
+          accessToken: upstreamToken,
+          codecType: codecType
         });
       };
       var createPeerConnection = function createPeerConnection(offer) {
@@ -166,7 +168,7 @@ var Anzu = function () {
 
   }, {
     key: "_startDownstream",
-    value: function _startDownstream(channelId, downstreamToken) {
+    value: function _startDownstream(channelId, downstreamToken, codecType) {
       var _this2 = this;
 
       var createOffer = function createOffer() {
@@ -176,7 +178,8 @@ var Anzu = function () {
         return _this2.sora.connect({
           role: "downstream",
           channelId: channelId,
-          accessToken: downstreamToken
+          accessToken: downstreamToken,
+          codecType: codecType
         });
       };
       var createPeerConnection = function createPeerConnection(offer) {
