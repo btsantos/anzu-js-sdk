@@ -86,7 +86,10 @@ class Anzu {
     let createAnswer = (offer) => {
       return new Promise((resolve, reject) => {
         this.pc.oniceconnectionstatechange = (event) => {
-          this.trace("Upstream oniceconnectionstatechange", this.pc.iceConnectionState);
+          this.trace("Upstream oniceconnectionstatechange", {
+            iceConnectionState: this.pc.iceConnectionState,
+            iceGatheringState: this.pc.iceGatheringState,
+          });
           switch (this.pc.iceConnectionState) {
             case "connected":
             case "completed":
@@ -98,7 +101,11 @@ class Anzu {
           }
         };
         this.pc.onicecandidate = (event) => {
-          this.trace("Upstream onicecandidate", event.candidate);
+          this.trace("Upstream onicecandidate", {
+            candidate: event.candidate,
+            iceConnectionState: this.pc.iceConnectionState,
+            iceGatheringState: this.pc.iceGatheringState,
+          });
           if (event.candidate !== null) {
             this.sora.candidate(event.candidate);
           }
@@ -164,7 +171,10 @@ class Anzu {
           }
         };
         this.pc.oniceconnectionstatechange = (event) => {
-          this.trace("Downstream oniceconnectionstatechange", this.pc.iceConnectionState);
+          this.trace("Downstream oniceconnectionstatechange", {
+            iceConnectionState: this.pc.iceConnectionState,
+            iceGatheringState: this.pc.iceGatheringState,
+          });
           switch (this.pc.iceConnectionState) {
             case "connected":
             case "completed":
@@ -179,7 +189,11 @@ class Anzu {
           }
         };
         this.pc.onicecandidate = (event) => {
-          this.trace("Downstream onicecandidate", event.candidate);
+          this.trace("Downstream onicecandidate", {
+            candidate: event.candidate,
+            iceConnectionState: this.pc.iceConnectionState,
+            iceGatheringState: this.pc.iceGatheringState,
+          });
           if (event.candidate !== null) {
             this.sora.candidate(event.candidate);
           }
