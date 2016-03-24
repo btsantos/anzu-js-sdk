@@ -1,11 +1,23 @@
-/**
+
+/*!
  * anzu-js-sdk
- * anzu-js-sdk
- * @version 0.5.0
+ * WebRTC SFU as a Service Anzu Library
+ * @version 0.5.1
  * @author Shiguredo Inc.
  * @license MIT
  */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Anzu = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function (global){
+/*!
+ * sora-js-sdk
+ * WebRTC SFU Sora Signaling Library
+ * @version 0.4.0
+ * @author Shiguredo Inc.
+ * @license MIT
+ */
+!function(n){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=n();else if("function"==typeof define&&define.amd)define([],n);else{var e;e="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this,e.Sora=n()}}(function(){return function n(e,o,t){function r(u,s){if(!o[u]){if(!e[u]){var c="function"==typeof require&&require;if(!s&&c)return c(u,!0);if(i)return i(u,!0);var f=new Error("Cannot find module '"+u+"'");throw f.code="MODULE_NOT_FOUND",f}var a=o[u]={exports:{}};e[u][0].call(a.exports,function(n){var o=e[u][1][n];return r(o?o:n)},a,a.exports,n,e,o,t)}return o[u].exports}for(var i="function"==typeof require&&require,u=0;u<t.length;u++)r(t[u]);return r}({1:[function(n,e,o){"use strict";function t(n,e){if(!(n instanceof e))throw new TypeError("Cannot call a class as a function")}var r=function(){function n(n,e){for(var o=0;o<e.length;o++){var t=e[o];t.enumerable=t.enumerable||!1,t.configurable=!0,"value"in t&&(t.writable=!0),Object.defineProperty(n,t.key,t)}}return function(e,o,t){return o&&n(e.prototype,o),t&&n(e,t),e}}(),i=function(){function n(e){t(this,n),this.url=e||""}return r(n,[{key:"connection",value:function(){return new s(this.url)}}]),n}(),u=["VP8","VP9","H264"],s=function(){function n(e){t(this,n),this._ws=null,this._url=e,this._onerror=function(){},this._onclose=function(){}}return r(n,[{key:"connect",value:function(n){var e=this;return new Promise(function(o,t){null===e._ws&&(e._ws=new WebSocket(e._url)),e._ws.onopen=function(){var o={type:"connect",role:n.role,channelId:n.channelId,accessToken:n.accessToken},t=u.indexOf(n.codecType);t>=0&&(o.video={codecType:u[t]}),e._ws.send(JSON.stringify(o))},e._ws.onclose=function(n){/440\d$/.test(n.code)?t(n):e._onclose(n)},e._ws.onerror=function(n){e._onerror(n)},e._ws.onmessage=function(n){var t=JSON.parse(n.data);"offer"==t.type?o(t):"ping"==t.type&&e._ws.send(JSON.stringify({type:"pong"}))}})}},{key:"answer",value:function(n){this._ws.send(JSON.stringify({type:"answer",sdp:n}))}},{key:"candidate",value:function(n){var e=n.toJSON();e.type="candidate",this._ws.send(JSON.stringify(e))}},{key:"onError",value:function(n){this._onerror=n}},{key:"onDisconnect",value:function(n){this._onclose=n}},{key:"disconnect",value:function(){this._ws.close(),this._ws=null}}]),n}();e.exports=i},{}]},{},[1])(1)});
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],2:[function(require,module,exports){
 "use strict";
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -58,12 +70,13 @@ var Anzu = function () {
     key: "start",
     value: function start(channelId, token) {
       var constraints = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+      var codecType = arguments.length <= 3 || arguments[3] === undefined ? "VP8" : arguments[3];
 
       if (this.role === "upstream") {
         var c = constraints === null ? { video: true, audio: true } : constraints;
-        return this._startUpstream(channelId, token, c);
+        return this._startUpstream(channelId, token, c, codecType);
       } else if (this.role === "downstream") {
-        return this._startDownstream(channelId, token);
+        return this._startDownstream(channelId, token, codecType);
       }
     }
     /**
@@ -77,7 +90,7 @@ var Anzu = function () {
 
   }, {
     key: "_startUpstream",
-    value: function _startUpstream(channelId, upstreamToken, constraints) {
+    value: function _startUpstream(channelId, upstreamToken, constraints, codecType) {
       var _this = this;
 
       var getUserMedia = function getUserMedia(constraints) {
@@ -102,7 +115,8 @@ var Anzu = function () {
         return _this.sora.connect({
           role: "upstream",
           channelId: channelId,
-          accessToken: upstreamToken
+          accessToken: upstreamToken,
+          codecType: codecType
         });
       };
       var createPeerConnection = function createPeerConnection(offer) {
@@ -119,7 +133,10 @@ var Anzu = function () {
       var createAnswer = function createAnswer(offer) {
         return new Promise(function (resolve, reject) {
           _this.pc.oniceconnectionstatechange = function (event) {
-            _this.trace("Upstream oniceconnectionstatechange", _this.pc.iceConnectionState);
+            _this.trace("Upstream oniceconnectionstatechange", {
+              iceConnectionState: _this.pc.iceConnectionState,
+              iceGatheringState: _this.pc.iceGatheringState
+            });
             switch (_this.pc.iceConnectionState) {
               case "connected":
               case "completed":
@@ -131,7 +148,11 @@ var Anzu = function () {
             }
           };
           _this.pc.onicecandidate = function (event) {
-            _this.trace("Upstream onicecandidate", event.candidate);
+            _this.trace("Upstream onicecandidate", {
+              candidate: event.candidate,
+              iceConnectionState: _this.pc.iceConnectionState,
+              iceGatheringState: _this.pc.iceGatheringState
+            });
             if (event.candidate !== null) {
               _this.sora.candidate(event.candidate);
             }
@@ -166,7 +187,7 @@ var Anzu = function () {
 
   }, {
     key: "_startDownstream",
-    value: function _startDownstream(channelId, downstreamToken) {
+    value: function _startDownstream(channelId, downstreamToken, codecType) {
       var _this2 = this;
 
       var createOffer = function createOffer() {
@@ -176,7 +197,8 @@ var Anzu = function () {
         return _this2.sora.connect({
           role: "downstream",
           channelId: channelId,
-          accessToken: downstreamToken
+          accessToken: downstreamToken,
+          codecType: codecType
         });
       };
       var createPeerConnection = function createPeerConnection(offer) {
@@ -203,7 +225,10 @@ var Anzu = function () {
             }
           };
           _this2.pc.oniceconnectionstatechange = function (event) {
-            _this2.trace("Downstream oniceconnectionstatechange", _this2.pc.iceConnectionState);
+            _this2.trace("Downstream oniceconnectionstatechange", {
+              iceConnectionState: _this2.pc.iceConnectionState,
+              iceGatheringState: _this2.pc.iceGatheringState
+            });
             switch (_this2.pc.iceConnectionState) {
               case "connected":
               case "completed":
@@ -218,7 +243,11 @@ var Anzu = function () {
             }
           };
           _this2.pc.onicecandidate = function (event) {
-            _this2.trace("Downstream onicecandidate", event.candidate);
+            _this2.trace("Downstream onicecandidate", {
+              candidate: event.candidate,
+              iceConnectionState: _this2.pc.iceConnectionState,
+              iceGatheringState: _this2.pc.iceGatheringState
+            });
             if (event.candidate !== null) {
               _this2.sora.candidate(event.candidate);
             }
@@ -321,125 +350,5 @@ var Anzu = function () {
 
 module.exports = Anzu;
 
-},{"sora-js-sdk":2}],2:[function(require,module,exports){
-(function (global){
-
-/*!
- * sora-js-sdk
- * WebRTC SFU Sora Signaling Library
- * @version 0.3.2
- * @author Shiguredo Inc.
- * @license MIT
- */
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Sora = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-"use strict";
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Sora = function () {
-  function Sora(url) {
-    _classCallCheck(this, Sora);
-
-    this.url = url || "";
-  }
-
-  _createClass(Sora, [{
-    key: "connection",
-    value: function connection() {
-      return new SoraConnection(this.url);
-    }
-  }]);
-
-  return Sora;
-}();
-
-var SoraConnection = function () {
-  function SoraConnection(url) {
-    _classCallCheck(this, SoraConnection);
-
-    this._ws = null;
-    this._url = url;
-    this._onerror = function () {};
-    this._onclose = function () {};
-  }
-
-  _createClass(SoraConnection, [{
-    key: "connect",
-    value: function connect(params) {
-      var _this = this;
-
-      return new Promise(function (resolve, reject) {
-        if (_this._ws === null) {
-          _this._ws = new WebSocket(_this._url);
-        }
-        _this._ws.onopen = function () {
-          var message = JSON.stringify({
-            type: "connect",
-            role: params.role,
-            channelId: params.channelId,
-            accessToken: params.accessToken
-          });
-          _this._ws.send(message);
-        };
-        _this._ws.onclose = function (e) {
-          if (/440\d$/.test(e.code)) {
-            reject(e);
-          } else {
-            _this._onclose(e);
-          }
-        };
-        _this._ws.onerror = function (e) {
-          _this._onerror(e);
-        };
-        _this._ws.onmessage = function (event) {
-          var data = JSON.parse(event.data);
-          if (data.type == "offer") {
-            resolve(data);
-          } else if (data.type == "ping") {
-            _this._ws.send(JSON.stringify({ type: "pong" }));
-          }
-        };
-      });
-    }
-  }, {
-    key: "answer",
-    value: function answer(sdp) {
-      this._ws.send(JSON.stringify({ type: "answer", sdp: sdp }));
-    }
-  }, {
-    key: "candidate",
-    value: function candidate(_candidate) {
-      var message = _candidate.toJSON();
-      message.type = "candidate";
-      this._ws.send(JSON.stringify(message));
-    }
-  }, {
-    key: "onError",
-    value: function onError(f) {
-      this._onerror = f;
-    }
-  }, {
-    key: "onDisconnect",
-    value: function onDisconnect(f) {
-      this._onclose = f;
-    }
-  }, {
-    key: "disconnect",
-    value: function disconnect() {
-      this._ws.close();
-      this._ws = null;
-    }
-  }]);
-
-  return SoraConnection;
-}();
-
-module.exports = Sora;
-
-},{}]},{},[1])(1)
-});
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[1])(1)
+},{"sora-js-sdk":1}]},{},[2])(2)
 });
