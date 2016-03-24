@@ -88,7 +88,7 @@ class Anzu {
         this.pc.oniceconnectionstatechange = (event) => {
           this.trace("Upstream oniceconnectionstatechange", {
             iceConnectionState: this.pc.iceConnectionState,
-            iceGatheringState: this.pc.iceGatheringState,
+            iceGatheringState: this.pc.iceGatheringState
           });
           switch (this.pc.iceConnectionState) {
             case "connected":
@@ -104,7 +104,7 @@ class Anzu {
           this.trace("Upstream onicecandidate", {
             candidate: event.candidate,
             iceConnectionState: this.pc.iceConnectionState,
-            iceGatheringState: this.pc.iceGatheringState,
+            iceGatheringState: this.pc.iceGatheringState
           });
           if (event.candidate !== null) {
             this.sora.candidate(event.candidate);
@@ -173,7 +173,7 @@ class Anzu {
         this.pc.oniceconnectionstatechange = (event) => {
           this.trace("Downstream oniceconnectionstatechange", {
             iceConnectionState: this.pc.iceConnectionState,
-            iceGatheringState: this.pc.iceGatheringState,
+            iceGatheringState: this.pc.iceGatheringState
           });
           switch (this.pc.iceConnectionState) {
             case "connected":
@@ -192,7 +192,7 @@ class Anzu {
           this.trace("Downstream onicecandidate", {
             candidate: event.candidate,
             iceConnectionState: this.pc.iceConnectionState,
-            iceGatheringState: this.pc.iceGatheringState,
+            iceGatheringState: this.pc.iceGatheringState
           });
           if (event.candidate !== null) {
             this.sora.candidate(event.candidate);
