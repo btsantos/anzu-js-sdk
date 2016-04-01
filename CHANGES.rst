@@ -19,6 +19,11 @@ develop
 0.5.1
 -----
 
+- [UPDATE] ドキュメントを修正する
+
+0.5.1
+-----
+
 - [UPDATE] ICE 関連の callback 内で出力していたログ内容を修正する
 - [UPDATE] パッケージを更新する
 - [UPDATE] sora-js-sdk を 0.4.0 にアップデートする

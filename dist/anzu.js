@@ -2,7 +2,7 @@
 /*!
  * anzu-js-sdk
  * WebRTC SFU as a Service Anzu Library
- * @version 0.5.1
+ * @version 0.5.2
  * @author Shiguredo Inc.
  * @license MIT
  */
@@ -11,7 +11,7 @@
 /*!
  * sora-js-sdk
  * WebRTC SFU Sora Signaling Library
- * @version 0.4.0
+ * @version 0.4.1
  * @author Shiguredo Inc.
  * @license MIT
  */
