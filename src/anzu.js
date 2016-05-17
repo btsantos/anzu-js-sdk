@@ -30,13 +30,13 @@ class Anzu {
    * @param {string} token - アクセストークン
    * @param {object} [constraints={video: true, audio: true}] - LocalMediaStream オブジェクトがサポートするメディアタイプ
    */
-  start(channelId, token, constraints=null, codecType="VP8") {
+  start(channelId, token, constraints=null, codecType="VP8", multistream=false) {
     if (this.role === "upstream") {
       let c = constraints === null ? { video: true, audio: true } : constraints;
-      return this._startUpstream(channelId, token, c, codecType);
+      return this._startUpstream(channelId, token, c, codecType, multistream);
     }
     else if (this.role === "downstream") {
-      return this._startDownstream(channelId, token, codecType);
+      return this._startDownstream(channelId, token, codecType, multistream);
     }
   }
   /**
@@ -47,7 +47,7 @@ class Anzu {
    * @param {object} constraints - LocalMediaStream オブジェクトがサポートするメディアタイプ
    * )
    */
-  _startUpstream(channelId, upstreamToken, constraints, codecType) {
+  _startUpstream(channelId, upstreamToken, constraints, codecType, multistream) {
     let getUserMedia = (constraints) => {
       return new Promise((resolve, reject) => {
         if (navigator.getUserMedia) {
@@ -69,7 +69,8 @@ class Anzu {
         role: "upstream",
         channelId: channelId,
         accessToken: upstreamToken,
-        codecType: codecType
+        codecType: codecType,
+        multistream: multistream
       });
     };
     let createPeerConnection = (offer) => {
@@ -135,7 +136,7 @@ class Anzu {
    * @param {string} channelId - チャンネルID
    * @param {string} downstreamToken - ダウンストリームトークン
    */
-  _startDownstream(channelId, downstreamToken, codecType) {
+  _startDownstream(channelId, downstreamToken, codecType, multistream) {
     let createOffer = () => {
       this.sora = new Sora(this.signalingUrl).connection();
       this.sora.onError(this._onError);
@@ -144,7 +145,8 @@ class Anzu {
         role: "downstream",
         channelId: channelId,
         accessToken: downstreamToken,
-        codecType: codecType
+        codecType: codecType,
+        multistream: multistream
       });
     };
     let createPeerConnection = (offer) => {
