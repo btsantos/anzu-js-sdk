@@ -75,11 +75,11 @@ class Anzu {
     };
     let createPeerConnection = (offer) => {
       this.trace("Upstream Offer sdp", offer.sdp);
-      this.trace("Upstream Offer clientId", offer.clientId);
       this.trace("Upstream Offer iceServers", offer.metadata.iceServers);
+      this.trace("Upstream Offer clientId", offer.client_id);
       return new Promise((resolve, _reject) => {
-        this.clientId = offer.clientId;
         this.pc = new RTCPeerConnection({ iceServers: offer.metadata.iceServers });
+        this.clientId = offer.client_id;
         this.pc.addStream(this.stream);
         resolve(offer);
       });
@@ -151,11 +151,11 @@ class Anzu {
     };
     let createPeerConnection = (offer) => {
       this.trace("Downstream offer sdp", offer.sdp);
-      this.trace("Downstream offer clientId", offer.clientId);
       this.trace("Downstream offer iceServers", offer.metadata.iceServers);
+      this.trace("Downstream offer clientId", offer.client_id);
       return new Promise((resolve, _reject) => {
-        this.clientId = offer.clientId;
         this.pc = new RTCPeerConnection({ iceServers: offer.metadata.iceServers });
+        this.clientId = offer.client_id;
         resolve(offer);
       });
     };
