@@ -13,7 +13,7 @@ FIX
 
 develop
 =======
-- [UPDATE] iceServers に渡すデータを変更する
+- [UPDATE] RTCPeerConnection に渡す config を修正する
 - [UPDATE] signaling 時に受け取るパラメーター名を clientId から client_id に変更する
 
 0.6.x
