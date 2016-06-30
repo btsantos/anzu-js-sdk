@@ -124,10 +124,10 @@ var Anzu = function () {
       var createPeerConnection = function createPeerConnection(offer) {
         _this.trace("Upstream Offer sdp", offer.sdp);
         _this.trace("Upstream Offer clientId", offer.client_id);
-        _this.trace("Upstream Offer iceServers", offer.config.iceServers);
+        _this.trace("Upstream Offer config", offer.config);
         return new Promise(function (resolve, _reject) {
           _this.clientId = offer.client_id;
-          _this.pc = new RTCPeerConnection({ iceServers: offer.config.iceServers });
+          _this.pc = new RTCPeerConnection(offer.config);
           _this.pc.addStream(_this.stream);
           resolve(offer);
         });
@@ -207,10 +207,10 @@ var Anzu = function () {
       var createPeerConnection = function createPeerConnection(offer) {
         _this2.trace("Downstream offer sdp", offer.sdp);
         _this2.trace("Downstream offer clientId", offer.client_id);
-        _this2.trace("Downstream offer iceServers", offer.config.iceServers);
+        _this2.trace("Downstream offer config", offer.config);
         return new Promise(function (resolve, _reject) {
           _this2.clientId = offer.client_id;
-          _this2.pc = new RTCPeerConnection({ iceServers: offer.config.iceServers });
+          _this2.pc = new RTCPeerConnection(offer.config);
           resolve(offer);
         });
       };
