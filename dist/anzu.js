@@ -123,11 +123,11 @@ var Anzu = function () {
       };
       var createPeerConnection = function createPeerConnection(offer) {
         _this.trace("Upstream Offer sdp", offer.sdp);
-        _this.trace("Upstream Offer clientId", offer.clientId);
-        _this.trace("Upstream Offer iceServers", offer.metadata.iceServers);
+        _this.trace("Upstream Offer clientId", offer.client_id);
+        _this.trace("Upstream Offer iceServers", offer.config.iceServers);
         return new Promise(function (resolve, _reject) {
-          _this.clientId = offer.clientId;
-          _this.pc = new RTCPeerConnection({ iceServers: offer.metadata.iceServers });
+          _this.clientId = offer.client_id;
+          _this.pc = new RTCPeerConnection({ iceServers: offer.config.iceServers });
           _this.pc.addStream(_this.stream);
           resolve(offer);
         });
@@ -206,11 +206,11 @@ var Anzu = function () {
       };
       var createPeerConnection = function createPeerConnection(offer) {
         _this2.trace("Downstream offer sdp", offer.sdp);
-        _this2.trace("Downstream offer clientId", offer.clientId);
-        _this2.trace("Downstream offer iceServers", offer.metadata.iceServers);
+        _this2.trace("Downstream offer clientId", offer.client_id);
+        _this2.trace("Downstream offer iceServers", offer.config.iceServers);
         return new Promise(function (resolve, _reject) {
-          _this2.clientId = offer.clientId;
-          _this2.pc = new RTCPeerConnection({ iceServers: offer.metadata.iceServers });
+          _this2.clientId = offer.client_id;
+          _this2.pc = new RTCPeerConnection({ iceServers: offer.config.iceServers });
           resolve(offer);
         });
       };
