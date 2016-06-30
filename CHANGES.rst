@@ -15,6 +15,7 @@ develop
 =======
 - [UPDATE] RTCPeerConnection に渡す config を修正する
 - [UPDATE] signaling 時に受け取るパラメーター名を clientId から client_id に変更する
+- [UPDATE] パッケージを更新する
 
 0.6.x
 =====
