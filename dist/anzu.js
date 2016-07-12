@@ -2,7 +2,7 @@
 /*!
  * anzu-js-sdk
  * WebRTC SFU as a Service Anzu Library
- * @version 0.6.0
+ * @version 0.6.1
  * @author Shiguredo Inc.
  * @license MIT
  */
